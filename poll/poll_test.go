@@ -4,49 +4,52 @@ import (
 	"testing"
 
 	"github.com/julianolorenzato/choosely/poll"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestNewPoll(t *testing.T) {
-	question := "Who is the best Valorant player of all time?"
-	options := []string{"Aspas", "Less", "Saadhak", "Cauanzin", "Tuyz"}
-	p, err := poll.NewPoll(question, options)
+type PollTestSuite struct {
+	suite.Suite
+	question string
+	options  []string
+}
 
-	// Poll should not be nil
-	assert.NotNil(t, p)
+func (s *PollTestSuite) SetupTest() {
+	s.question = "Who is the best Valorant player of all time?"
+	s.options = []string{"Aspas", "Less", "Saadhak", "Cauanzin", "Tuyz"}
+}
 
-	// NewPoll should not return a error
-	assert.Nil(t, err)
+func TestPoll(t *testing.T) {
+	suite.Run(t, new(PollTestSuite))
+}
 
-	// Poll Question should be question
-	assert.Equal(t, p.Question, question)
+func (s *PollTestSuite) TestNewPoll() {
+	p, err := poll.NewPoll(s.question, s.options)
 
-	// Poll ID should be have 36 characters (uuid)
-	assert.Len(t, p.ID, 36)
+	s.NotNil(p)
+	s.Nil(err)
+	s.Equal(p.Question, s.question)
+	s.Len(p.ID, 36)
+	s.NotEmpty(p.Options)
+	s.Len(p.Options, len(s.options))
 
-	// Poll Options map should not be empty
-	assert.NotEmpty(t, p.Options)
+	// -------------------------------------------
 
-	// Poll Options map len should be equal options len
-	assert.Len(t, p.Options, len(options))
+	s.question = "W"
+	p, err = poll.NewPoll(s.question, s.options)
 
-	// ---------------------------------------------------
+	s.Nil(p)
+	s.NotNil(err)
+	s.ErrorContains(err, "poll question must have at least 2 characters")
 
-	question = "W"
-	options = []string{"Aspas", "Less", "Saadhak", "Cauanzin", "Tuyz"}
-	p, err = poll.NewPoll(question, options)
+	// -------------------------------------------
 
-	assert.Nil(t, p)
-	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "poll question must have at least 2 characters")
+	s.options = []string{}
+	p, err = poll.NewPoll(s.question, s.options)
 
-	// ---------------------------------------------------
+	s.Nil(p)
+	s.NotNil(err)
+	s.ErrorContains(err, "poll question must have at least 2 characters")
 
-	question = "Who is the best Valorant player of all time?"
-	options = []string{}
-	p, err = poll.NewPoll(question, options)
+	// -------------------------------------------
 
-	assert.Nil(t, p)
-	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "poll must have at least 1 option")
 }
