@@ -22,8 +22,16 @@ func NewPoll(question string, options []string) (*Poll, error) {
 		return nil, errors.New("poll question must have at least 2 characters")
 	}
 
+	if len(question) > 50 {
+		return nil, errors.New("poll question must have a maximum of 50 characteres")
+	}
+
 	if len(options) < 1 {
 		return nil, errors.New("poll must have at least 1 option")
+	}
+
+	if len(options) > 100 {
+		return nil, errors.New("poll must have a maximum of 50 options")
 	}
 
 	p := &Poll{
