@@ -13,7 +13,6 @@ import (
 
 type PollTestSuite struct {
 	suite.Suite
-	// p *poll.Poll
 }
 
 func (s *PollTestSuite) SetupSubTest() {
@@ -160,64 +159,36 @@ func (s *PollTestSuite) TestNewPoll() {
 	})
 }
 
-// func (s *PollTestSuite) TestGetNumOfPossibleChoises() {
-// 	p := poll.Poll{
-// 		ChoicesWeight: []uint{1, 2, 3, 4, 5},
-// 	}
+func (s *PollTestSuite) TestResults() {
+	// Arrange
+	p := &poll.Poll{
+		ID:              "49289bb5-7228-4ee0-8a53-3ac84d3e5733",
+		Question:        "Who is the GOAT actor/actress?",
+		NumberOfChoices: 2,
+		Options: map[string]bool{
+			"Adam Sandler":   true,
+			"Angelina Jolie": true,
+			"Nicole Kidman":  true,
+			"Will Smith":     true,
+		},
+		Votes: []poll.Vote{
+			{OptionsChoosed: []string{"Adam Sandler", "Nicole Kidman"}},
+			{OptionsChoosed: []string{"Will Smith", "Nicole Kidman"}},
+			{OptionsChoosed: []string{"Angelina Jolie", "Will Smith"}},
+			{OptionsChoosed: []string{"Nicole Kidman", "Angelina Jolie"}},
+			{OptionsChoosed: []string{"Will Smith", "Adam Sandler"}},
+		},
+		IsPermanent: true,
+	}
 
-// 	res := p.GetNumOfPossibleChoices()
+	// Act
+	res := p.Results()
 
-// 	s.EqualValues(res, 5)
-// }
-
-// func (s *PollTestSuite) TestAddOption() {
-// 	makePoll := func() *poll.Poll {
-// 		return &poll.Poll{
-// 			Options: map[string][]poll.Vote{
-// 				"Aspas":   {},
-// 				"Saadhak": {},
-// 			},
-// 		}
-// 	}
-
-// 	s.Run("It should add a new option", func() {
-// 		// Arrange
-// 		p := makePoll()
-
-// 		// Act
-// 		err := p.AddOption("Less")
-
-// 		// Assert
-// 		s.Nil(err)
-// 		s.Contains(p.Options, "Less")
-// 		s.Len(p.Options, 3)
-// 	})
-
-// 	s.Run("It should not add an option that already exists", func() {
-// 		// Arrange
-// 		p := makePoll()
-
-// 		// Act
-// 		err := p.AddOption("Aspas")
-
-// 		// Assert
-// 		s.NotNil(err)
-// 		s.Equal(err, &shared.AlreadyExistsError{Class: "option", Name: "Aspas"})
-// 		s.Len(p.Options, 2)
-// 	})
-// }
-
-// func (s *PollTestSuite) TestResults() {
-// 	for i := 0; i < 5; i++ {
-// 		s.poll.Options[strconv.Itoa(i)] = []poll.Vote{{}, {}}
-// 	}
-
-// 	res := s.poll.Results()
-
-// 	// s.Len(res, 10)
-// 	// s.Equal(len(res), 5)
-
-// 	for _, v := range res {
-// 		s.EqualValues(v, 2)
-// 	}
-// }
+	// Assert
+	s.EqualValues(map[string]int{
+		"Adam Sandler":   3,
+		"Angelina Jolie": 3,
+		"Nicole Kidman":  4,
+		"Will Smith":     5,
+	}, res)
+}
