@@ -192,3 +192,81 @@ func (s *PollTestSuite) TestResults() {
 		"Will Smith":     5,
 	}, res)
 }
+
+func (s *PollTestSuite) TestVote() {
+	s.Run("It should vote", func() {
+		p := &poll.Poll{
+			Options: map[string]bool{
+				"first":  true,
+				"second": true,
+				"third":  true,
+			},
+			IsPermanent: true,
+			NumberOfChoices: 2,
+			Votes:           []poll.Vote{},
+		}
+
+		err := p.Vote("49289bb5-7228-4ee0-8a53-3ac84d3e5733", []string{"first", "third"})
+
+		s.Nil(err)
+		s.Len(p.Votes, 1)
+	})
+
+	s.Run("It should not vote if the poll is not permanent and the expires date is already passed", func() {
+		p := &poll.Poll{
+			Options: map[string]bool{
+				"first":  true,
+				"second": true,
+				"third":  true,
+			},
+			NumberOfChoices: 2,
+			Votes:           []poll.Vote{},
+			IsPermanent: false,
+			ExpiresAt: time.Now().AddDate(0, 0, -1),
+		}
+
+		err := p.Vote("49289bb5-7228-4ee0-8a53-3ac84d3e5733", []string{"first", "third"})
+
+		s.NotNil(err)
+		s.IsType(err, &shared.ExpiredError{})
+		s.Len(p.Votes, 0)
+	})
+
+	s.Run("It should not vote if the length of choosed options is different from the Poll.NumberOfChoices", func() {
+		p := &poll.Poll{
+			Options: map[string]bool{
+				"first":  true,
+				"second": true,
+				"third":  true,
+			},
+			IsPermanent: true,
+			NumberOfChoices: 2,
+			Votes:           []poll.Vote{},
+		}
+
+		err := p.Vote("49289bb5-7228-4ee0-8a53-3ac84d3e5733", []string{"first"})
+
+		s.NotNil(err)
+		s.ErrorContains(err, "length of choosed options in a Vote must be equal Poll.NumberOfChoices")
+		s.Len(p.Votes, 0)
+	})
+
+	s.Run("It should not vote if some of choosed options does not exists", func() {
+		p := &poll.Poll{
+			Options: map[string]bool{
+				"first":  true,
+				"second": true,
+				"third":  true,
+			},
+			IsPermanent: true,
+			NumberOfChoices: 2,
+			Votes:           []poll.Vote{},
+		}
+
+		err := p.Vote("49289bb5-7228-4ee0-8a53-3ac84d3e5733", []string{"first", "fourth"})
+
+		s.NotNil(err)
+		s.IsType(err, &shared.DoesNotExistsError{})
+		s.Len(p.Votes, 0)
+	})
+}
