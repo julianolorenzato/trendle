@@ -88,21 +88,33 @@ func (p *Poll) Results() map[string]int {
 	return r
 }
 
-// func (p *Poll) Vote(voterID string, optName string) error {
-// 	_, exists := p.Options[optName]
-// 	if !exists {
-// 		return &shared.DoesNotExistsError{Class: "option", Name: optName}
-// 	}
+func (p *Poll) Vote(voterID string, options []string) error {
+	if !p.IsPermanent && p.ExpiresAt.Before(time.Now()) {
+		return &shared.ExpiredError{Name: "poll", ExpiredDate: p.ExpiresAt}
+	}
 
-// 	for _, v := range p.Options {
-// 		for i := range v {
-// 			if v[i].VoterID == voterID {
-// 				return errors.New("voter " + voterID + " already voted in this poll")
-// 			}
-// 		}
-// 	}
+	if len(options) != int(p.NumberOfChoices) {
+		return errors.New("length of choosed options in a Vote must be equal Poll.NumberOfChoices")
+	}
 
-// 	p.Options[optName] = append(p.Options[optName], Vote{uuid.NewString(), voterID, time.Now()})
+	v := Vote{
+		ID:             uuid.NewString(),
+		VoterID:        voterID,
+		OptionsChoosed: make([]string, p.NumberOfChoices),
+		CreatedAt:      time.Now(),
+	}
 
-// 	return nil
-// }
+	for i := range options {
+		exists := p.Options.exists(options[i])
+
+		if !exists {
+			return &shared.DoesNotExistsError{Class: "option", Name: options[i]}
+		}
+
+		v.OptionsChoosed[i] = options[i]
+	}
+
+	p.Votes = append(p.Votes, v)
+
+	return nil
+}
