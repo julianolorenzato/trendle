@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/julianolorenzato/choosely/poll"
-	"github.com/julianolorenzato/choosely/shared"
+	"github.com/julianolorenzato/choosely/domain/poll"
+	"github.com/julianolorenzato/choosely/domain"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -62,7 +62,7 @@ func (s *PollTestSuite) TestNewPoll() {
 		// Assert
 		s.Nil(p)
 		s.NotNil(err)
-		s.IsType(err, &shared.RangeError{})
+		s.IsType(err, &domain.RangeError{})
 	})
 
 	s.Run("It should not create a new Poll if the question have more than 50 characters", func() {
@@ -72,7 +72,7 @@ func (s *PollTestSuite) TestNewPoll() {
 		// Assert
 		s.Nil(p)
 		s.NotNil(err)
-		s.IsType(err, &shared.RangeError{})
+		s.IsType(err, &domain.RangeError{})
 	})
 
 	s.Run("It should not create a new Poll if it have less than 2 options", func() {
@@ -82,7 +82,7 @@ func (s *PollTestSuite) TestNewPoll() {
 		// Assert
 		s.Nil(p)
 		s.NotNil(err)
-		s.IsType(err, &shared.RangeError{})
+		s.IsType(err, &domain.RangeError{})
 	})
 
 	s.Run("It should not create a new Poll if it have more than 100 options", func() {
@@ -98,7 +98,7 @@ func (s *PollTestSuite) TestNewPoll() {
 		// Assert
 		s.Nil(p)
 		s.NotNil(err)
-		s.IsType(err, &shared.RangeError{})
+		s.IsType(err, &domain.RangeError{})
 	})
 
 	s.Run("It should not create a poll if the number of choices is zero", func() {
@@ -155,7 +155,7 @@ func (s *PollTestSuite) TestNewPoll() {
 		// Assert
 		s.NotNil(err)
 		s.Nil(p)
-		s.IsType(err, &shared.ExpiredError{})
+		s.IsType(err, &domain.ExpiredError{})
 	})
 }
 
@@ -228,7 +228,7 @@ func (s *PollTestSuite) TestVote() {
 		err := p.Vote("49289bb5-7228-4ee0-8a53-3ac84d3e5733", []string{"first", "third"})
 
 		s.NotNil(err)
-		s.IsType(err, &shared.ExpiredError{})
+		s.IsType(err, &domain.ExpiredError{})
 		s.Len(p.Votes, 0)
 	})
 
@@ -266,7 +266,7 @@ func (s *PollTestSuite) TestVote() {
 		err := p.Vote("49289bb5-7228-4ee0-8a53-3ac84d3e5733", []string{"first", "fourth"})
 
 		s.NotNil(err)
-		s.IsType(err, &shared.DoesNotExistsError{})
+		s.IsType(err, &domain.DoesNotExistsError{})
 		s.Len(p.Votes, 0)
 	})
 }

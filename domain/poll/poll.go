@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/julianolorenzato/choosely/shared"
+	"github.com/julianolorenzato/choosely/domain"
 )
 
 type Poll struct {
@@ -36,11 +36,11 @@ type Vote struct {
 
 func NewPoll(qtn string, opts []string, nCh uint32, isPerm bool, exp time.Time) (*Poll, error) {
 	if len(qtn) < 2 || len(qtn) > 50 {
-		return nil, &shared.RangeError{Name: "poll question characters length", Min: 2, Max: 50}
+		return nil, &domain.RangeError{Name: "poll question characters length", Min: 2, Max: 50}
 	}
 
 	if len(opts) < 2 || len(opts) > 100 {
-		return nil, &shared.RangeError{Name: "poll options", Min: 2, Max: 100}
+		return nil, &domain.RangeError{Name: "poll options", Min: 2, Max: 100}
 	}
 
 	if nCh == 0 || nCh > uint32(len(opts)) {
@@ -51,7 +51,7 @@ func NewPoll(qtn string, opts []string, nCh uint32, isPerm bool, exp time.Time) 
 		exp = time.Time{}
 	} else {
 		if exp.Before(time.Now()) {
-			return nil, &shared.ExpiredError{Name: "poll", ExpiredDate: exp}
+			return nil, &domain.ExpiredError{Name: "poll", ExpiredDate: exp}
 		}
 	}
 
@@ -90,7 +90,7 @@ func (p *Poll) Results() map[string]int {
 
 func (p *Poll) Vote(voterID string, options []string) error {
 	if !p.IsPermanent && p.ExpiresAt.Before(time.Now()) {
-		return &shared.ExpiredError{Name: "poll", ExpiredDate: p.ExpiresAt}
+		return &domain.ExpiredError{Name: "poll", ExpiredDate: p.ExpiresAt}
 	}
 
 	if len(options) != int(p.NumberOfChoices) {
@@ -108,7 +108,7 @@ func (p *Poll) Vote(voterID string, options []string) error {
 		exists := p.Options.exists(options[i])
 
 		if !exists {
-			return &shared.DoesNotExistsError{Class: "option", Name: options[i]}
+			return &domain.DoesNotExistsError{Class: "option", Name: options[i]}
 		}
 
 		v.OptionsChoosed[i] = options[i]

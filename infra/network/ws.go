@@ -1,4 +1,4 @@
-package infra
+package network
 
 import (
 	"fmt"
@@ -7,7 +7,10 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{}
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
 
 func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -34,22 +37,4 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-}
-
-// func setupRoutes() *http.ServeMux {
-// 	mux := http.NewServeMux()
-
-// 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-// 		io.WriteString(w, "Heyheyhey")
-// 	})
-
-// 	websocket.
-
-// 	return mux
-// }
-
-func StartServer() {
-	http.HandleFunc("/ws", handleWebSocket)
-
-	http.ListenAndServe("localhost:3005", nil)
 }

@@ -1,7 +1,7 @@
 package main
 
-import "github.com/julianolorenzato/choosely/infra"
+import "github.com/julianolorenzato/choosely/infra/network"
 
 func main() {
-	infra.StartServer()
+	network.StartServer()
 }
