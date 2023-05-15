@@ -21,14 +21,18 @@ type Poll struct {
 
 type Options map[string]bool
 
+func (o Options) exists(optName string) bool {
+	_, ok := o[optName]
+
+	return ok
+}
+
 type Vote struct {
 	ID             string
 	VoterID        string
 	OptionsChoosed []string
 	CreatedAt      time.Time
 }
-
-// Enquete com ranking, onde é possível votar em mais de uma opção, e atribuir uma ordem de pesos ex: Aspas: 5, Less: 4, Saadhak: 3, Cauanzin: 2, Tuyz: 1
 
 func NewPoll(qtn string, opts []string, nCh uint32, isPerm bool, exp time.Time) (*Poll, error) {
 	if len(qtn) < 2 || len(qtn) > 50 {
@@ -69,20 +73,20 @@ func NewPoll(qtn string, opts []string, nCh uint32, isPerm bool, exp time.Time) 
 	return p, nil
 }
 
-// func (p *Poll) GetNumOfPossibleChoices() uint {
-// 	return uint(len(p.ChoicesWeight))
-// }
+func (p *Poll) Results() map[string]int {
+	r := make(map[string]int)
 
-// func (p *Poll) Results() map[string]uint32 {
-// 	result := make(map[string]uint32)
+	for i := range p.Votes {
+		l := len(p.Votes[i].OptionsChoosed)
 
-// 	for k, v := range p.Options {
-// 		fmt.Println(k, "opt")
-// 		result[k] = uint32(len(v))
-// 	}
+		for _, o := range p.Votes[i].OptionsChoosed {
+			r[o] += l
+			l--
+		}
+	}
 
-// 	return result
-// }
+	return r
+}
 
 // func (p *Poll) Vote(voterID string, optName string) error {
 // 	_, exists := p.Options[optName]
