@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  database:
+    image: postgres
+    container_name: choosely_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: main
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - main-net
+
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: choosely_app
+    ports:
+      - 8080:8080
+    depends_on:
+      - database
+    networks:
+      - main-net
+    command: /app/server
+    
+volumes:
+  db-data:
+
+networks:
+  main-net:
+    driver: bridge

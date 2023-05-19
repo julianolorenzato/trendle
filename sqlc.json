@@ -1,0 +1,16 @@
+{
+  "version": "2",
+  "sql": [
+    {
+      "engine": "postgresql",
+      "queries": "infra/persistence/queries.sql",
+      "schema": "infra/persistence/schema.sql",
+      "gen": {
+        "go": {
+          "package": "persistence",
+          "out": "infra/persistence"
+        }
+      }
+    }
+  ]
+}

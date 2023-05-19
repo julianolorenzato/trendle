@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Choosely</title>
+  </head>
+  <body>
+    <h1>This is the Socket Client</h1>
+    <script>
+      const socket = new WebSocket('ws://localhost:8080/ws');
+
+      socket.onopen = (event) => {
+        console.log(event);
+        socket.send('Hi server');
+    };
+    
+    socket.onclose = () => {
+        console.log('Socket connection closed');
+    };
+    
+    socket.onmessage = event => {
+        console.log(event)
+      }
+
+      socket.onerror = (error) => {
+        console.log('Something goes wrong', error);
+      };
+    </script>
+  </body>
+</html>
