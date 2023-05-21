@@ -9,14 +9,14 @@ import (
 )
 
 type Poll struct {
-	ID              string
-	Question        string
-	NumberOfChoices uint32
-	Options         Options
-	Votes           []Vote
-	IsPermanent     bool
-	ExpiresAt       time.Time
-	CreatedAt       time.Time
+	ID              string    `json:"id"`
+	Question        string    `json:"question"`
+	NumberOfChoices uint32    `json:"number_of_choices"`
+	Options         Options   `json:"options"`
+	Votes           []Vote    `json:"votes"`
+	IsPermanent     bool      `json:"is_permanent"`
+	ExpiresAt       time.Time `json:"expires_at"`
+	CreatedAt       time.Time `json:"created_at"`
 }
 
 type Options map[string]bool
