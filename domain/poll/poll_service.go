@@ -1,20 +1,25 @@
-package application
+package poll
 
 import (
 	"fmt"
-
-	"github.com/julianolorenzato/choosely/domain/poll"
+	"time"
 )
 
 type PollService struct {
-	Repo poll.PollRepository
+	Repo PollRepository
 }
 
-func NewPollService(repo poll.PollRepository) *PollService {
+func NewPollService(repo PollRepository) *PollService {
 	return &PollService{Repo: repo}
 }
 
-func (s *PollService) VoteInPoll(dto poll.VoteInPollDTO) error {
+type VoteInPollDTO struct {
+	PollID         string
+	VoterID        string
+	OptionsChoosed []string
+}
+
+func (s *PollService) VoteInPoll(dto VoteInPollDTO) error {
 	p := s.Repo.GetByID(dto.PollID)
 	if p == nil {
 		return fmt.Errorf("poll of id %s not found", dto.PollID)
@@ -33,8 +38,16 @@ func (s *PollService) VoteInPoll(dto poll.VoteInPollDTO) error {
 	return nil
 }
 
-func (s *PollService) CreateNewPoll(dto poll.CreateNewPollDTO) error {
-	p, err := poll.NewPoll(
+type CreateNewPollDTO struct {
+	Question        string
+	Options         []string
+	NumberOfChoices uint32
+	IsPermanent     bool
+	ExpiresAt       time.Time
+}
+
+func (s *PollService) CreateNewPoll(dto CreateNewPollDTO) error {
+	p, err := NewPoll(
 		dto.Question,
 		dto.Options,
 		dto.NumberOfChoices,
