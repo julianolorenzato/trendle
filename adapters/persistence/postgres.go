@@ -8,7 +8,7 @@ import (
 	"github.com/julianolorenzato/choosely/domain/poll"
 )
 
-func InitialisePostgres() (*sql.DB, error) {
+func EstablishPostgresConnection() (*sql.DB, error) {
 	db, err := sql.Open("postgres", os.Getenv("POSTGRES_CONNECTION_STRING"))
 	if err != nil {
 		return nil, err
@@ -17,12 +17,19 @@ func InitialisePostgres() (*sql.DB, error) {
 	return db, err
 }
 
-type PollRepository struct {
+type PostgresPollRepository struct {
 	writer *sql.DB
 	reader *sql.DB
 }
 
-func (repo *PollRepository) GetAllPolls() error {
+func NewPostgresPostgresPollRepository(w, r *sql.DB) *PostgresPollRepository {
+	return &PostgresPollRepository{
+		writer: w,
+		reader: r,
+	}
+}
+
+func (repo *PostgresPollRepository) GetAllPolls() error {
 	rows, err := repo.reader.Query("SELECT * FROM polls")
 	if err != nil {
 		return err
@@ -43,7 +50,7 @@ func (repo *PollRepository) GetAllPolls() error {
 	return nil
 }
 
-func (repo *PollRepository) Create(poll poll.Poll) error {
+func (repo *PostgresPollRepository) Create(poll poll.Poll) error {
 	_, err := repo.writer.Exec(
 		`INSERT INTO polls
 		(id, question, number_of_choices, options, votes, is_permanent, expires_at, created_at)

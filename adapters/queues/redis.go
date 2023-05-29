@@ -1,4 +1,4 @@
-package persistence
+package queues
 
 import (
 	"context"

@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/julianolorenzato/choosely/domain/poll"
 	"github.com/julianolorenzato/choosely/domain"
+	"github.com/julianolorenzato/choosely/domain/poll"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -201,7 +201,7 @@ func (s *PollTestSuite) TestVote() {
 				"second": true,
 				"third":  true,
 			},
-			IsPermanent: true,
+			IsPermanent:     true,
 			NumberOfChoices: 2,
 			Votes:           []poll.Vote{},
 		}
@@ -221,8 +221,8 @@ func (s *PollTestSuite) TestVote() {
 			},
 			NumberOfChoices: 2,
 			Votes:           []poll.Vote{},
-			IsPermanent: false,
-			ExpiresAt: time.Now().AddDate(0, 0, -1),
+			IsPermanent:     false,
+			ExpiresAt:       time.Now().AddDate(0, 0, -1),
 		}
 
 		err := p.Vote("49289bb5-7228-4ee0-8a53-3ac84d3e5733", []string{"first", "third"})
@@ -239,7 +239,7 @@ func (s *PollTestSuite) TestVote() {
 				"second": true,
 				"third":  true,
 			},
-			IsPermanent: true,
+			IsPermanent:     true,
 			NumberOfChoices: 2,
 			Votes:           []poll.Vote{},
 		}
@@ -258,7 +258,7 @@ func (s *PollTestSuite) TestVote() {
 				"second": true,
 				"third":  true,
 			},
-			IsPermanent: true,
+			IsPermanent:     true,
 			NumberOfChoices: 2,
 			Votes:           []poll.Vote{},
 		}
