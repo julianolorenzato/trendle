@@ -4,6 +4,8 @@ services:
   postgres:
     image: postgres
     container_name: choosely-postgres
+    ports:
+      - 5432:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -27,7 +29,8 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - database
+      - postgres
+      - redis
     networks:
       - main-net
     command: /app/server

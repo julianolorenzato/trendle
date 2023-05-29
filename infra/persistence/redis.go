@@ -8,21 +8,19 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-var redisClient = redis.NewClient(&redis.Options{
-	Addr:     os.Getenv("REDIS_ADDR"),
-	Password: "",
-	DB:       0,
-})
+func InitialiseRedis() *redis.Client {
+	rdC := redis.NewClient(&redis.Options{
+		Addr:     os.Getenv("REDIS_ADDR"),
+		Password: os.Getenv("REDIS_PASS"),
+		DB:       0,
+	})
 
-var ctx = context.Background()
-
-func TestConnection() {
-	_, err := redisClient.Ping(ctx).Result()
-
+	pong, err := rdC.Ping(context.Background()).Result()
 	if err != nil {
-		log.Println(err)
+		log.Fatal("Redis connection failed.", err)
 	}
-}
 
-func Set(str any) {
+	log.Println("Redis sucessfully connected. Ping:", pong)
+
+	return rdC
 }
