@@ -7,10 +7,10 @@ import (
 )
 
 type PollHandler struct {
-	service poll.PollService
+	service *poll.PollService
 }
 
-func NewPollHandler(s poll.PollService) *PollHandler {
+func NewPollHandler(s *poll.PollService) *PollHandler {
 	return &PollHandler{service: s}
 }
 
