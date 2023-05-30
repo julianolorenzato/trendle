@@ -2,7 +2,6 @@ package persistence
 
 import (
 	"database/sql"
-	"fmt"
 	"os"
 
 	"github.com/julianolorenzato/choosely/domain/poll"
@@ -30,26 +29,23 @@ func NewPostgresPostgresPollRepository(w, r *sql.DB) *PostgresPollRepository {
 	}
 }
 
-func (repo *PostgresPollRepository) GetByID(ID string) *poll.Poll {
-	rows /* err */, _ := repo.reader.Query("SELECT * FROM polls")
-	// if err != nil {
-	// 	return err
-	// }
+func (repo *PostgresPollRepository) GetByID(ID string) (*poll.Poll, error) {
+	rows, err := repo.reader.Query("SELECT * FROM polls WHERE id = ?", ID)
+	if err != nil {
+		return nil, err
+	}
 	defer rows.Close()
 
+	var poll *poll.Poll
+
 	for rows.Next() {
-		var poll poll.Poll
-
-		/* err :=  */
-		rows.Scan(&poll.ID)
-		// if err != nil {
-		// 	return err
-		// }
-
-		fmt.Println(rows)
+		err := rows.Scan(&poll.ID, &poll.Question, &poll.NumberOfChoices)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return nil
+	return poll, nil
 }
 
 func (repo *PostgresPollRepository) Save(poll *poll.Poll) error {

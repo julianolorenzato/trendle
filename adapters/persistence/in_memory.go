@@ -12,14 +12,14 @@ func NewInMemoryPollRepository() *InMemoryPollRepository {
 	}
 }
 
-func (r *InMemoryPollRepository) GetByID(ID string) *poll.Poll {
+func (r *InMemoryPollRepository) GetByID(ID string) (*poll.Poll, error){
 	for i := range r.Polls {
 		if r.Polls[i].ID == ID {
-			return r.Polls[i]
+			return r.Polls[i], nil
 		}
 	}
 
-	return nil
+	return nil, nil
 }
 
 func (r *InMemoryPollRepository) Create(poll *poll.Poll) error {

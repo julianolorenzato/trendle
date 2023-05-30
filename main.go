@@ -29,5 +29,7 @@ func main() {
 	http.HandleFunc("/poll/create", pollHandler.CreateNewPoll)
 	http.HandleFunc("/poll/vote", pollHandler.VoteInPoll)
 
+	log.Println("Starting server...")
+
 	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 }

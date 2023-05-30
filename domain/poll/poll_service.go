@@ -20,12 +20,15 @@ type VoteInPollDTO struct {
 }
 
 func (s *PollService) VoteInPoll(dto VoteInPollDTO) error {
-	p := s.Repo.GetByID(dto.PollID)
+	p, err := s.Repo.GetByID(dto.PollID)
+	if err != nil {
+		return err
+	}
 	if p == nil {
 		return fmt.Errorf("poll of id %s not found", dto.PollID)
 	}
 
-	err := p.Vote(dto.VoterID, dto.OptionsChoosed)
+	err = p.Vote(dto.VoterID, dto.OptionsChoosed)
 	if err != nil {
 		return err
 	}

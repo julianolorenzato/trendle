@@ -21,8 +21,9 @@ func TestInMemoryPollRepository(t *testing.T) {
 			},
 		}
 
-		p := iMPR.GetByID(ids[1])
+		p, err := iMPR.GetByID(ids[1])
 
+		assert.Nil(t, err)
 		assert.NotNil(t, p)
 		assert.Equal(t, p, iMPR.Polls[1])
 	})
@@ -32,8 +33,9 @@ func TestInMemoryPollRepository(t *testing.T) {
 			Polls: []*poll.Poll{},
 		}
 
-		p := iMPR.GetByID(uuid.NewString())
+		p, err := iMPR.GetByID(uuid.NewString())
 
+		assert.Nil(t, err)
 		assert.Nil(t, p)
 	})
 
