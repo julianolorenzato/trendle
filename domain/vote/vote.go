@@ -13,11 +13,6 @@ type Vote struct {
 	CreatedAt      time.Time
 }
 
-type VoteRepository interface {
-	GetByID(ID string) *Vote
-	Create(*Vote)
-}
-
 func New(voterID string, optionsChoosed []string) *Vote {
 	return &Vote{
 		ID:             uuid.NewString(),

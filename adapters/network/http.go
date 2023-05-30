@@ -8,7 +8,6 @@ import (
 
 type PollHandler struct {
 	service poll.PollService
-	
 }
 
 func NewPollHandler(s poll.PollService) *PollHandler {
@@ -22,4 +21,8 @@ func (h *PollHandler) CreateNewPoll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.service.CreateNewPoll(poll.CreateNewPollDTO{})
+}
+
+func (h *PollHandler) VoteInPoll(w http.ResponseWriter, r *http.Request) {
+	h.service.VoteInPoll(poll.VoteInPollDTO{})
 }
