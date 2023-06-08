@@ -2,17 +2,45 @@ package persistence
 
 import (
 	"database/sql"
+	"log"
 	"os"
 
 	"github.com/julianolorenzato/choosely/domain/poll"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
 )
 
 func EstablishPostgresConnection() (*sql.DB, error) {
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	// Open database's poll of connections
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL")+"?sslmode=disable")
 	if err != nil {
 		return nil, err
 	}
+
+	// Test database's poll of connections
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the database driver
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a new migrator
+	m, err := migrate.NewWithDatabaseInstance("file://migrations", "main", driver)
+	if err != nil {
+		return nil, err
+	}
+
+	// Perform "up" migrations
+	m.Up()
+
+	log.Println("database initialised and migrations performed")
 
 	return db, err
 }
