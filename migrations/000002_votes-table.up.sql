@@ -3,5 +3,6 @@ CREATE TABLE IF NOT EXISTS votes (
     voter_id            UUID NOT NULL,
     options_choosed     VARCHAR(255)[] NOT NULL,
     created_at          DATE NOT NULL,
-    poll_id             UUID NOT NULL FOREIGN KEY
+    poll_id             UUID NOT NULL,
+    FOREIGN KEY(poll_id) REFERENCES polls(id)
 );
