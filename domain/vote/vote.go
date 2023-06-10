@@ -9,15 +9,15 @@ import (
 type Vote struct {
 	ID             string
 	VoterID        string
-	OptionsChoosed []string
+	ChoosenOptions []string
 	CreatedAt      time.Time
 }
 
-func New(voterID string, optionsChoosed []string) *Vote {
+func New(voterID string, choosenOptions []string) *Vote {
 	return &Vote{
 		ID:             uuid.NewString(),
 		VoterID:        voterID,
-		OptionsChoosed: optionsChoosed,
+		ChoosenOptions: choosenOptions,
 		CreatedAt:      time.Now(),
 	}
 }

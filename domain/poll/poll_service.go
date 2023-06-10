@@ -13,6 +13,36 @@ func NewPollService(repo PollRepository) *PollService {
 	return &PollService{Repo: repo}
 }
 
+// ----------------------------------------------------------
+
+type CreateNewPollDTO struct {
+	Question        string
+	Options         []string
+	NumberOfChoices uint32
+	IsPermanent     bool
+	ExpiresAt       time.Time
+}
+
+func (s *PollService) CreateNewPoll(dto CreateNewPollDTO) error {
+	p, err := NewPoll(
+		dto.Question,
+		dto.Options,
+		dto.NumberOfChoices,
+		dto.IsPermanent,
+		dto.ExpiresAt,
+	)
+	if err != nil {
+		return err
+	}
+
+	err = s.Repo.Save(p)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 type VoteInPollDTO struct {
 	PollID         string
 	VoterID        string
@@ -41,30 +71,15 @@ func (s *PollService) VoteInPoll(dto VoteInPollDTO) error {
 	return nil
 }
 
-type CreateNewPollDTO struct {
-	Question        string
-	Options         []string
-	NumberOfChoices uint32
-	IsPermanent     bool
-	ExpiresAt       time.Time
+type GetPollResultsDTO struct {
+	PollID string
 }
 
-func (s *PollService) CreateNewPoll(dto CreateNewPollDTO) error {
-	p, err := NewPoll(
-		dto.Question,
-		dto.Options,
-		dto.NumberOfChoices,
-		dto.IsPermanent,
-		dto.ExpiresAt,
-	)
+func (s *PollService) GetPollResults(dto GetPollResultsDTO) (map[string]uint, error) {
+	p, err := s.Repo.GetByID(dto.PollID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = s.Repo.Save(p)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	p.
 }

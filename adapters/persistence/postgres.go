@@ -5,10 +5,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/julianolorenzato/choosely/domain/poll"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/julianolorenzato/choosely/domain/poll"
 	_ "github.com/lib/pq"
 )
 
@@ -83,14 +83,48 @@ func (repo *PostgresPollRepository) Save(poll *poll.Poll) error {
 func (repo *PostgresPollRepository) Create(poll *poll.Poll) error {
 	_, err := repo.writer.Exec(
 		`INSERT INTO polls
-		(id, question, number_of_choices, options, votes, is_permanent, expires_at, created_at)
+		(id, question, number_of_choices, options, is_permanent, expires_at, created_at)
 		VALUES
 		(?, ?, ?, ?, ?, ?, ?, ?)`,
-		poll.ID, poll.Question, poll.NumberOfChoices, poll.Options, poll.Votes, poll.IsPermanent, poll.ExpiresAt, poll.CreatedAt,
+		poll.ID, poll.Question, poll.NumberOfChoices, poll.Options, poll.IsPermanent, poll.ExpiresAt, poll.CreatedAt,
 	)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+type PostgresVotesRepository struct {
+	writer *sql.DB
+	reader *sql.DB
+}
+
+func (repo *PostgresVotesRepository) GetResults() (map[string]uint, error) {
+	rows, err := repo.reader.Query(
+		`SELECT option, COUNT(*) FROM votes,
+		UNNEST(choosen_options) AS option
+		WHERE poll_id = $1
+		GROUP BY option`,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	results := make(map[string]uint)
+
+	for rows.Next() {
+		var option string
+		var votes uint
+
+		err := rows.Scan(option, votes)
+		if err != nil {
+			return nil, err
+		}
+
+		results[option] = votes
+	}
+
+	return results, nil
 }

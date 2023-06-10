@@ -13,7 +13,7 @@ type Poll struct {
 	Question        string    `json:"question"`
 	NumberOfChoices uint32    `json:"number_of_choices"`
 	Options         Options   `json:"options"`
-	Votes           []Vote    `json:"votes"`
+	VotesIDs        []string  `json:"votes"`
 	IsPermanent     bool      `json:"is_permanent"`
 	ExpiresAt       time.Time `json:"expires_at"`
 	CreatedAt       time.Time `json:"created_at"`
@@ -25,13 +25,6 @@ func (o Options) exists(optName string) bool {
 	_, ok := o[optName]
 
 	return ok
-}
-
-type Vote struct {
-	ID             string
-	VoterID        string
-	OptionsChoosed []string
-	CreatedAt      time.Time
 }
 
 func NewPoll(qtn string, opts []string, nCh uint32, isPerm bool, exp time.Time) (*Poll, error) {
@@ -60,7 +53,7 @@ func NewPoll(qtn string, opts []string, nCh uint32, isPerm bool, exp time.Time) 
 		Question:        qtn,
 		NumberOfChoices: nCh,
 		Options:         make(map[string]bool),
-		Votes:           make([]Vote, 0),
+		VotesIDs:        make([]string, 0),
 		IsPermanent:     isPerm,
 		ExpiresAt:       exp,
 		CreatedAt:       time.Now(),
