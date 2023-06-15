@@ -1,0 +1,1 @@
+Should I move the folders into adapters folder to the root folder?
