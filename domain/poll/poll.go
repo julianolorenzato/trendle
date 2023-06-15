@@ -2,10 +2,12 @@ package poll
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/julianolorenzato/choosely/domain"
+	"github.com/julianolorenzato/choosely/domain/vote"
 )
 
 type Poll struct {
@@ -66,48 +68,23 @@ func NewPoll(qtn string, opts []string, nCh uint32, isPerm bool, exp time.Time) 
 	return p, nil
 }
 
-func (p *Poll) Results() map[string]int {
-	r := make(map[string]int)
-
-	for i := range p.Votes {
-		l := len(p.Votes[i].OptionsChoosed)
-
-		for _, o := range p.Votes[i].OptionsChoosed {
-			r[o] += l
-			l--
-		}
-	}
-
-	return r
-}
-
-func (p *Poll) Vote(voterID string, options []string) error {
+func (p *Poll) CheckVote(vote *vote.Vote) error {
 	if !p.IsPermanent && p.ExpiresAt.Before(time.Now()) {
 		return &domain.ExpiredError{Name: "poll", ExpiredDate: p.ExpiresAt}
 	}
 
-	if len(options) != int(p.NumberOfChoices) {
-		return errors.New("length of choosed options in a Vote must be equal Poll.NumberOfChoices")
+	if len(vote.ChoosenOptions) != int(p.NumberOfChoices) {
+		err := fmt.Errorf("the vote must have %d choosen options", p.NumberOfChoices)
+		return err
 	}
 
-	v := Vote{
-		ID:             uuid.NewString(),
-		VoterID:        voterID,
-		OptionsChoosed: make([]string, p.NumberOfChoices),
-		CreatedAt:      time.Now(),
-	}
-
-	for i := range options {
-		exists := p.Options.exists(options[i])
+	for _, option := range vote.ChoosenOptions {
+		exists := p.Options.exists(option)
 
 		if !exists {
-			return &domain.DoesNotExistsError{Class: "option", Name: options[i]}
+			return &domain.DoesNotExistsError{Class: "option", Name: option}
 		}
-
-		v.OptionsChoosed[i] = options[i]
 	}
-
-	p.Votes = append(p.Votes, v)
 
 	return nil
 }

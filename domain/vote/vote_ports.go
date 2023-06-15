@@ -1,7 +1,7 @@
 package vote
 
 type VoteRepository interface {
-	GetResults(pollID string) map[string]int
+	GetPollResults(pollID string) map[string]uint
 	GetByID(ID string) *Vote
 	Create(*Vote) error
 }

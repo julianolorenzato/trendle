@@ -3,14 +3,20 @@ package poll
 import (
 	"fmt"
 	"time"
+
+	"github.com/julianolorenzato/choosely/domain/vote"
 )
 
 type PollService struct {
-	Repo PollRepository
+	pollRepo PollRepository
+	voteRepo vote.VoteRepository
 }
 
-func NewPollService(repo PollRepository) *PollService {
-	return &PollService{Repo: repo}
+func NewPollService(pollRepo PollRepository, voteRepo vote.VoteRepository) *PollService {
+	return &PollService{
+		pollRepo,
+		voteRepo,
+	}
 }
 
 // ----------------------------------------------------------
@@ -35,7 +41,7 @@ func (s *PollService) CreateNewPoll(dto CreateNewPollDTO) error {
 		return err
 	}
 
-	err = s.Repo.Save(p)
+	err = s.pollRepo.Save(p)
 	if err != nil {
 		return err
 	}
@@ -46,24 +52,28 @@ func (s *PollService) CreateNewPoll(dto CreateNewPollDTO) error {
 type VoteInPollDTO struct {
 	PollID         string
 	VoterID        string
-	OptionsChoosed []string
+	ChoosenOptions []string
 }
 
 func (s *PollService) VoteInPoll(dto VoteInPollDTO) error {
-	p, err := s.Repo.GetByID(dto.PollID)
+	p, err := s.pollRepo.GetByID(dto.PollID)
 	if err != nil {
 		return err
 	}
+
 	if p == nil {
-		return fmt.Errorf("poll of id %s not found", dto.PollID)
+		err := fmt.Errorf("poll of id %s not found", dto.PollID)
+		return err
 	}
 
-	err = p.Vote(dto.VoterID, dto.OptionsChoosed)
+	v := vote.New(dto.VoterID, dto.ChoosenOptions)
+
+	err = p.CheckVote(v)
 	if err != nil {
 		return err
 	}
 
-	err = s.Repo.Save(p)
+	err = s.voteRepo.Create(v)
 	if err != nil {
 		return err
 	}
@@ -76,10 +86,13 @@ type GetPollResultsDTO struct {
 }
 
 func (s *PollService) GetPollResults(dto GetPollResultsDTO) (map[string]uint, error) {
-	p, err := s.Repo.GetByID(dto.PollID)
-	if err != nil {
+	exists := s.pollRepo.Exists(dto.PollID)
+	if !exists {
+		err := fmt.Errorf("poll of id %s does not exists", dto.PollID)
 		return nil, err
 	}
 
-	p.
+	res := s.voteRepo.GetPollResults(dto.PollID)
+
+	return res, nil
 }
