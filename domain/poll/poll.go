@@ -15,7 +15,6 @@ type Poll struct {
 	Question        string    `json:"question"`
 	NumberOfChoices uint32    `json:"number_of_choices"`
 	Options         Options   `json:"options"`
-	VotesIDs        []string  `json:"votes"`
 	IsPermanent     bool      `json:"is_permanent"`
 	ExpiresAt       time.Time `json:"expires_at"`
 	CreatedAt       time.Time `json:"created_at"`
@@ -55,7 +54,6 @@ func NewPoll(qtn string, opts []string, nCh uint32, isPerm bool, exp time.Time) 
 		Question:        qtn,
 		NumberOfChoices: nCh,
 		Options:         make(map[string]bool),
-		VotesIDs:        make([]string, 0),
 		IsPermanent:     isPerm,
 		ExpiresAt:       exp,
 		CreatedAt:       time.Now(),

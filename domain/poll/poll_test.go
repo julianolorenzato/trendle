@@ -6,8 +6,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/julianolorenzato/choosely/domain"
 	"github.com/julianolorenzato/choosely/domain/poll"
+	"github.com/julianolorenzato/choosely/domain/vote"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -15,21 +17,7 @@ type PollTestSuite struct {
 	suite.Suite
 }
 
-func (s *PollTestSuite) SetupSubTest() {
-	// s.p = &poll.Poll{
-	// 	ID:       "49289bb5-7228-4ee0-8a53-3ac84d3e5733",
-	// 	Question: "How many brothers do you have?",
-	// 	Options: map[string][]poll.Vote{
-	// 		"zero": {
-	// 			{"4b241f2b-295b-4ebf-b2b2-fd6ff4db20eb", "John Doe"},
-	// 			{"db99a42b-a56f-42fa-970a-e81d128d6335", "Joana Doe"},
-	// 		},
-	// 		"one":  {},
-	// 		"two":  {},
-	// 		"more": {},
-	// 	},
-	// }
-}
+func (s *PollTestSuite) SetupSubTest() { /*...*/ }
 
 func TestPoll(t *testing.T) {
 	suite.Run(t, new(PollTestSuite))
@@ -50,7 +38,6 @@ func (s *PollTestSuite) TestNewPoll() {
 		s.Len(p.ID, 36)
 		s.Equal(p.Question, q)
 		s.Len(p.Options, 3)
-		s.Empty(p.Votes)
 		s.True(p.IsPermanent)
 		s.EqualValues(p.NumberOfChoices, 3)
 	})
@@ -159,42 +146,9 @@ func (s *PollTestSuite) TestNewPoll() {
 	})
 }
 
-func (s *PollTestSuite) TestResults() {
-	// Arrange
-	p := &poll.Poll{
-		ID:              "49289bb5-7228-4ee0-8a53-3ac84d3e5733",
-		Question:        "Who is the GOAT actor/actress?",
-		NumberOfChoices: 2,
-		Options: map[string]bool{
-			"Adam Sandler":   true,
-			"Angelina Jolie": true,
-			"Nicole Kidman":  true,
-			"Will Smith":     true,
-		},
-		Votes: []poll.Vote{
-			{OptionsChoosed: []string{"Adam Sandler", "Nicole Kidman"}},
-			{OptionsChoosed: []string{"Will Smith", "Nicole Kidman"}},
-			{OptionsChoosed: []string{"Angelina Jolie", "Will Smith"}},
-			{OptionsChoosed: []string{"Nicole Kidman", "Angelina Jolie"}},
-			{OptionsChoosed: []string{"Will Smith", "Adam Sandler"}},
-		},
-		IsPermanent: true,
-	}
-
-	// Act
-	res := p.Results()
-
-	// Assert
-	s.EqualValues(map[string]int{
-		"Adam Sandler":   3,
-		"Angelina Jolie": 3,
-		"Nicole Kidman":  4,
-		"Will Smith":     5,
-	}, res)
-}
-
-func (s *PollTestSuite) TestVote() {
-	s.Run("It should vote", func() {
+func (s *PollTestSuite) TestCheckVote() {
+	s.Run("It should not return a error", func() {
+		// Assert
 		p := &poll.Poll{
 			Options: map[string]bool{
 				"first":  true,
@@ -203,13 +157,18 @@ func (s *PollTestSuite) TestVote() {
 			},
 			IsPermanent:     true,
 			NumberOfChoices: 2,
-			Votes:           []poll.Vote{},
 		}
 
-		err := p.Vote("49289bb5-7228-4ee0-8a53-3ac84d3e5733", []string{"first", "third"})
+		v := &vote.Vote{
+			ID:             uuid.NewString(),
+			VoterID:        uuid.NewString(),
+			ChoosenOptions: []string{"first", "third"},
+			CreatedAt:      time.Now(),
+		}
+
+		err := p.CheckVote(v)
 
 		s.Nil(err)
-		s.Len(p.Votes, 1)
 	})
 
 	s.Run("It should not vote if the poll is not permanent and the expires date is already passed", func() {
@@ -220,16 +179,21 @@ func (s *PollTestSuite) TestVote() {
 				"third":  true,
 			},
 			NumberOfChoices: 2,
-			Votes:           []poll.Vote{},
 			IsPermanent:     false,
 			ExpiresAt:       time.Now().AddDate(0, 0, -1),
 		}
 
-		err := p.Vote("49289bb5-7228-4ee0-8a53-3ac84d3e5733", []string{"first", "third"})
+		v := &vote.Vote{
+			ID:             uuid.NewString(),
+			VoterID:        uuid.NewString(),
+			ChoosenOptions: []string{"first", "third"},
+			CreatedAt:      time.Now(),
+		}
+
+		err := p.CheckVote(v)
 
 		s.NotNil(err)
 		s.IsType(err, &domain.ExpiredError{})
-		s.Len(p.Votes, 0)
 	})
 
 	s.Run("It should not vote if the length of choosed options is different from the Poll.NumberOfChoices", func() {
@@ -241,14 +205,19 @@ func (s *PollTestSuite) TestVote() {
 			},
 			IsPermanent:     true,
 			NumberOfChoices: 2,
-			Votes:           []poll.Vote{},
 		}
 
-		err := p.Vote("49289bb5-7228-4ee0-8a53-3ac84d3e5733", []string{"first"})
+		v := &vote.Vote{
+			ID:             uuid.NewString(),
+			VoterID:        uuid.NewString(),
+			ChoosenOptions: []string{"first"},
+			CreatedAt:      time.Now(),
+		}
+
+		err := p.CheckVote(v)
 
 		s.NotNil(err)
-		s.ErrorContains(err, "length of choosed options in a Vote must be equal Poll.NumberOfChoices")
-		s.Len(p.Votes, 0)
+		s.ErrorContains(err, "the vote must have ")
 	})
 
 	s.Run("It should not vote if some of choosed options does not exists", func() {
@@ -260,13 +229,18 @@ func (s *PollTestSuite) TestVote() {
 			},
 			IsPermanent:     true,
 			NumberOfChoices: 2,
-			Votes:           []poll.Vote{},
+		}
+		
+		v := &vote.Vote{
+			ID:             uuid.NewString(),
+			VoterID:        uuid.NewString(),
+			ChoosenOptions: []string{"first", "fourth"},
+			CreatedAt:      time.Now(),
 		}
 
-		err := p.Vote("49289bb5-7228-4ee0-8a53-3ac84d3e5733", []string{"first", "fourth"})
+		err := p.CheckVote(v)
 
 		s.NotNil(err)
 		s.IsType(err, &domain.DoesNotExistsError{})
-		s.Len(p.Votes, 0)
 	})
 }

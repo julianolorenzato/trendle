@@ -14,7 +14,8 @@ func TestCreateNewPoll(t *testing.T) {
 
 	t.Run("Should create a new poll", func(t *testing.T) {
 		s := &poll.PollService{
-			Repo: persistence.NewInMemoryPollRepository(),
+			PollRepo: persistence.NewInMemoryPollRepository(),
+			VoteRepo: persistence.NewInMemoryVoteRepository(),
 		}
 
 		err := s.CreateNewPoll(poll.CreateNewPollDTO{

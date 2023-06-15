@@ -8,14 +8,14 @@ import (
 )
 
 type PollService struct {
-	pollRepo PollRepository
-	voteRepo vote.VoteRepository
+	PollRepo PollRepository
+	VoteRepo vote.VoteRepository
 }
 
-func NewPollService(pollRepo PollRepository, voteRepo vote.VoteRepository) *PollService {
+func NewPollService(PollRepo PollRepository, VoteRepo vote.VoteRepository) *PollService {
 	return &PollService{
-		pollRepo,
-		voteRepo,
+		PollRepo,
+		VoteRepo,
 	}
 }
 
@@ -41,7 +41,7 @@ func (s *PollService) CreateNewPoll(dto CreateNewPollDTO) error {
 		return err
 	}
 
-	err = s.pollRepo.Save(p)
+	err = s.PollRepo.Save(p)
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ type VoteInPollDTO struct {
 }
 
 func (s *PollService) VoteInPoll(dto VoteInPollDTO) error {
-	p, err := s.pollRepo.GetByID(dto.PollID)
+	p, err := s.PollRepo.GetByID(dto.PollID)
 	if err != nil {
 		return err
 	}
@@ -66,14 +66,14 @@ func (s *PollService) VoteInPoll(dto VoteInPollDTO) error {
 		return err
 	}
 
-	v := vote.New(dto.VoterID, dto.ChoosenOptions)
+	v := vote.New(dto.VoterID, dto.PollID, dto.ChoosenOptions)
 
 	err = p.CheckVote(v)
 	if err != nil {
 		return err
 	}
 
-	err = s.voteRepo.Create(v)
+	err = s.VoteRepo.Create(v)
 	if err != nil {
 		return err
 	}
@@ -86,13 +86,13 @@ type GetPollResultsDTO struct {
 }
 
 func (s *PollService) GetPollResults(dto GetPollResultsDTO) (map[string]uint, error) {
-	exists := s.pollRepo.Exists(dto.PollID)
+	exists := s.PollRepo.Exists(dto.PollID)
 	if !exists {
 		err := fmt.Errorf("poll of id %s does not exists", dto.PollID)
 		return nil, err
 	}
 
-	res := s.voteRepo.GetPollResults(dto.PollID)
+	res := s.VoteRepo.GetPollResults(dto.PollID)
 
 	return res, nil
 }
