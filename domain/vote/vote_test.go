@@ -13,13 +13,13 @@ func TestNew(t *testing.T) {
 
 	t.Run("It should create a new vote", func(t *testing.T) {
 		voterID := uuid.NewString()
-		optionsChoosed := []string{"Dog", "Avocado", "Purple"}
+		choosenOptions := []string{"Dog", "Avocado", "Purple"}
 
-		v := vote.New(voterID, optionsChoosed)
+		v := vote.New(voterID, choosenOptions)
 
 		a.NotNil(v)
 		a.Equal(v.VoterID, voterID)
-		a.Equal(v.OptionsChoosed, optionsChoosed)
+		a.Equal(v.ChoosenOptions, choosenOptions)
 		a.NotEmpty(v.CreatedAt)
 	})
 }
