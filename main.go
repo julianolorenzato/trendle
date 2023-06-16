@@ -22,8 +22,9 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	pollRepo := persistence.NewPostgresPostgresPollRepository(db, db)
-	pollService := poll.NewPollService(pollRepo)
+	pollRepo := persistence.NewPostgresPollRepository(db, db)
+	voteRepo := persistence.NewPostgresVoteRepository(db, db)
+	pollService := poll.NewPollService(pollRepo, voteRepo)
 	pollHandler := network.NewPollHandler(pollService)
 
 	http.HandleFunc("/poll/create", pollHandler.CreateNewPoll)

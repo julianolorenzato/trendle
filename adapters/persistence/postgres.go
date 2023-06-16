@@ -50,11 +50,15 @@ type PostgresPollRepository struct {
 	reader *sql.DB
 }
 
-func NewPostgresPostgresPollRepository(w, r *sql.DB) *PostgresPollRepository {
+func NewPostgresPollRepository(w, r *sql.DB) *PostgresPollRepository {
 	return &PostgresPollRepository{
 		writer: w,
 		reader: r,
 	}
+}
+
+func (repo *PostgresPollRepository) Exists(ID string) bool {
+	
 }
 
 func (repo *PostgresPollRepository) GetByID(ID string) (*poll.Poll, error) {
@@ -95,12 +99,20 @@ func (repo *PostgresPollRepository) Create(poll *poll.Poll) error {
 	return nil
 }
 
-type PostgresVotesRepository struct {
+type PostgresVoteRepository struct {
 	writer *sql.DB
 	reader *sql.DB
 }
 
-func (repo *PostgresVotesRepository) GetResults() (map[string]uint, error) {
+func NewPostgresVoteRepository(w, r *sql.DB) *PostgresVoteRepository {
+	return &PostgresVoteRepository{
+		writer: w,
+		reader: r,
+	}
+}
+
+
+func (repo *PostgresVoteRepository) GetResults() (map[string]uint, error) {
 	rows, err := repo.reader.Query(
 		`SELECT option, COUNT(*) FROM votes,
 		UNNEST(choosen_options) AS option
