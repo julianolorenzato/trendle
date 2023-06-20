@@ -7,9 +7,9 @@ import (
 
 // NEED TO REFACTOR
 func StartServer() {
-	http.HandleFunc("/ws", handleWebSocket)
-	http.HandleFunc("/vote", handleVote)
-	http.HandleFunc("/createPoll", handleCreatePoll)
+	// http.HandleFunc("/ws", handleWebSocket)
+	// http.HandleFunc("/vote", handleVote)
+	// http.HandleFunc("/createPoll", handleCreatePoll)
 
 	log.Println("Starting server...")
 

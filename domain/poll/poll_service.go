@@ -86,13 +86,20 @@ type GetPollResultsDTO struct {
 }
 
 func (s *PollService) GetPollResults(dto GetPollResultsDTO) (map[string]uint, error) {
-	exists := s.PollRepo.Exists(dto.PollID)
-	if !exists {
+	poll, err := s.PollRepo.GetByID(dto.PollID)
+	if err != nil {
+		return nil, err
+	}
+
+	if poll == nil {
 		err := fmt.Errorf("poll of id %s does not exists", dto.PollID)
 		return nil, err
 	}
 
-	res := s.VoteRepo.GetPollResults(dto.PollID)
+	res, err := s.VoteRepo.GetResults(dto.PollID)
+	if err != nil {
+		return nil, err
+	}
 
 	return res, nil
 }

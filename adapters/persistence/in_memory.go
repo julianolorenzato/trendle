@@ -78,7 +78,7 @@ func (r *InMemoryVoteRepository) GetByID(ID string) (*vote.Vote, error){
 	return nil, nil
 }
 
-func (r *InMemoryVoteRepository) GetPollResults(pollID string) map[string]uint {
+func (r *InMemoryVoteRepository) GetResults(pollID string) (map[string]uint, error){
 	res := make(map[string]uint)
 
 	for i := range r.Votes {
@@ -90,5 +90,5 @@ func (r *InMemoryVoteRepository) GetPollResults(pollID string) map[string]uint {
 		}
 	}
 
-	return res
+	return res, nil
 }

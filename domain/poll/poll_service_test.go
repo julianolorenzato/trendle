@@ -4,31 +4,49 @@ import (
 	"testing"
 	"time"
 
-	"github.com/julianolorenzato/choosely/domain/poll"
 	"github.com/julianolorenzato/choosely/adapters/persistence"
-	"github.com/stretchr/testify/assert"
+	"github.com/julianolorenzato/choosely/domain/poll"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestCreateNewPoll(t *testing.T) {
-	a := assert.New(t)
+type TestSuite struct {
+	suite.Suite
+	sut *poll.PollService
+}
 
-	t.Run("Should create a new poll", func(t *testing.T) {
-		s := &poll.PollService{
-			PollRepo: persistence.NewInMemoryPollRepository(),
-			VoteRepo: persistence.NewInMemoryVoteRepository(),
+func Test(t *testing.T) {
+	suite.Run(t, new(TestSuite))
+}
+
+func (s *TestSuite) SetupSubTest() {
+	s.sut = &poll.PollService{
+		PollRepo: persistence.NewInMemoryPollRepository(),
+		VoteRepo: persistence.NewInMemoryVoteRepository(),
+	}
+}
+
+func (s *TestSuite) TestCreateNewPoll() {
+	s.Run("Should create a new poll", func() {
+		dto := poll.CreateNewPollDTO{
+			Question:        "Some question",
+			Options:         []string{"opt0", "opt1", "opt2"},
+			NumberOfChoices: 2,
+			IsPermanent:     true,
+			ExpiresAt:       time.Now(),
 		}
 
-		err := s.CreateNewPoll(poll.CreateNewPollDTO{
-			Question: "Some question",
-			Options: []string{
-				"opt0", "opt1", "opt2",
-			},
-			NumberOfChoices: 2,
-			IsPermanent: true,
-			ExpiresAt: time.Now(),
-		})
+		err := s.sut.CreateNewPoll(dto)
 
-		a.Nil(err)
-		
+		s.Nil(err)
 	})
+
+	// s.Run("It should not cre", func() {
+
+	// })
+}
+
+func (s *TestSuite) TestVoteInPoll() {
+	// s.Run("It should vote in a poll", func() {
+
+	// })
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/julianolorenzato/choosely/domain/poll"
+	"github.com/julianolorenzato/choosely/domain/vote"
 	_ "github.com/lib/pq"
 )
 
@@ -45,6 +46,8 @@ func EstablishPostgresConnection() (*sql.DB, error) {
 	return db, err
 }
 
+// --------------------------------------------------------------------------------
+
 type PostgresPollRepository struct {
 	writer *sql.DB
 	reader *sql.DB
@@ -55,10 +58,6 @@ func NewPostgresPollRepository(w, r *sql.DB) *PostgresPollRepository {
 		writer: w,
 		reader: r,
 	}
-}
-
-func (repo *PostgresPollRepository) Exists(ID string) bool {
-	
 }
 
 func (repo *PostgresPollRepository) GetByID(ID string) (*poll.Poll, error) {
@@ -80,10 +79,6 @@ func (repo *PostgresPollRepository) GetByID(ID string) (*poll.Poll, error) {
 	return poll, nil
 }
 
-func (repo *PostgresPollRepository) Save(poll *poll.Poll) error {
-	return nil
-}
-
 func (repo *PostgresPollRepository) Create(poll *poll.Poll) error {
 	_, err := repo.writer.Exec(
 		`INSERT INTO polls
@@ -99,6 +94,12 @@ func (repo *PostgresPollRepository) Create(poll *poll.Poll) error {
 	return nil
 }
 
+func (repo *PostgresPollRepository) Save(poll *poll.Poll) error {
+	return nil
+}
+
+// --------------------------------------------------------------------------------
+
 type PostgresVoteRepository struct {
 	writer *sql.DB
 	reader *sql.DB
@@ -111,13 +112,40 @@ func NewPostgresVoteRepository(w, r *sql.DB) *PostgresVoteRepository {
 	}
 }
 
+func (repo *PostgresVoteRepository) GetByID(ID string) (*vote.Vote, error) {
+	row := repo.reader.QueryRow(`SELECT * FROM votes WHERE id = $1`, ID)
 
-func (repo *PostgresVoteRepository) GetResults() (map[string]uint, error) {
+	var vote *vote.Vote
+
+	err := row.Scan(&vote.ID, &vote.VoterID, &vote.PollID)
+	if err != nil {
+		return nil, err
+	}
+
+	return vote, nil
+}
+
+func (repo *PostgresVoteRepository) Create(vote *vote.Vote) error {
+	_, err := repo.writer.Exec(
+		`INSERT INTO votes (id, voter_id, poll_id, choosen_options, created_at)
+		VALUES ($1, $2, $3, $4, $5)`,
+		vote.ID, vote.VoterID, vote.VoterID, vote.ChoosenOptions, vote.CreatedAt,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo *PostgresVoteRepository) GetResults(pollID string) (map[string]uint, error) {
 	rows, err := repo.reader.Query(
 		`SELECT option, COUNT(*) FROM votes,
 		UNNEST(choosen_options) AS option
 		WHERE poll_id = $1
 		GROUP BY option`,
+		pollID,
 	)
 	if err != nil {
 		return nil, err
