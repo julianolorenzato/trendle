@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/julianolorenzato/choosely/adapters/persistence"
 	"github.com/julianolorenzato/choosely/domain/poll"
 	"github.com/stretchr/testify/suite"
@@ -39,14 +40,47 @@ func (s *TestSuite) TestCreateNewPoll() {
 
 		s.Nil(err)
 	})
-
-	// s.Run("It should not cre", func() {
-
-	// })
 }
 
 func (s *TestSuite) TestVoteInPoll() {
-	// s.Run("It should vote in a poll", func() {
+	p := &poll.Poll{
+		ID:              uuid.NewString(),
+		NumberOfChoices: 3,
+		Options: map[string]bool{
+			"Strawberry": true,
+			"Orange":     true,
+			"Banana":     true,
+			"Apple":      true,
+			"Avocado":    true,
+		},
+		IsPermanent: true,
+	}
 
-	// })
+	s.Run("It should vote in a poll", func() {
+		s.sut.PollRepo.Save(p)
+
+		dto := poll.VoteInPollDTO{
+			PollID:         p.ID,
+			VoterID:        uuid.NewString(),
+			ChoosenOptions: []string{"Strawberry", "Orange", "Avocado"},
+		}
+
+		err := s.sut.VoteInPoll(dto)
+
+		s.Nil(err)
+	})
+
+	s.Run("It should not vote in a poll that does not exists", func() {
+		s.sut.PollRepo.Save(p)
+
+		dto := poll.VoteInPollDTO{
+			PollID:         uuid.NewString(), // <-- Random pollID
+			VoterID:        uuid.NewString(),
+			ChoosenOptions: []string{"Strawberry", "Orange", "Avocado"},
+		}
+
+		err := s.sut.VoteInPoll(dto)
+
+		s.ErrorContains(err, "not found")
+	})
 }
