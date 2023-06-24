@@ -84,3 +84,9 @@ func (s *TestSuite) TestVoteInPoll() {
 		s.ErrorContains(err, "not found")
 	})
 }
+
+func (s *TestSuite)TestGetPollResults() {
+	s.Run("It should get the poll results", func ()  {
+		// ...
+	})
+}
