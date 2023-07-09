@@ -85,8 +85,9 @@ func (s *TestSuite) TestVoteInPoll() {
 	})
 }
 
-func (s *TestSuite)TestGetPollResults() {
-	s.Run("It should get the poll results", func ()  {
+// Only query, so does not need test?
+func (s *TestSuite) TestGetPollResults() {
+	s.Run("It should get the poll results", func() {
 		// ...
 	})
 }
