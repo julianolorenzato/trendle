@@ -61,7 +61,7 @@ func NewPostgresPollRepository(w, r *sql.DB) *PostgresPollRepository {
 }
 
 func (repo *PostgresPollRepository) GetByID(ID string) (*poll.Poll, error) {
-	rows, err := repo.reader.Query("SELECT * FROM polls WHERE id = ?", ID)
+	rows, err := repo.reader.Query("SELECT * FROM polls WHERE id = $1", ID)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func (repo *PostgresPollRepository) Create(poll *poll.Poll) error {
 		`INSERT INTO polls
 		(id, question, number_of_choices, options, is_permanent, expires_at, created_at)
 		VALUES
-		(?, ?, ?, ?, ?, ?, ?, ?)`,
+		($1, $2, $3, $4, $5, $6, $7, $8)`,
 		poll.ID, poll.Question, poll.NumberOfChoices, poll.Options, poll.IsPermanent, poll.ExpiresAt, poll.CreatedAt,
 	)
 	if err != nil {
