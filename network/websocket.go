@@ -1,8 +1,8 @@
 package network
 
 import (
-	"fmt"
 	"github.com/julianolorenzato/choosely/core/domain"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -28,25 +28,25 @@ type WSMessage struct {
 func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
-	fmt.Println("Connected websocket")
+	log.Println("Connected websocket")
 
 	defer conn.Close()
 
 	for {
 		mt, message, err := conn.ReadMessage()
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			break
 		}
 
-		fmt.Println(message)
+		log.Println(message)
 
 		err = conn.WriteMessage(mt, message)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			break
 		}
 	}

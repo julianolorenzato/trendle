@@ -24,3 +24,12 @@ func InitialiseRedis() *redis.Client {
 
 	return rdC
 }
+
+type RedisQueueProducer struct {
+	client *redis.Client
+}
+
+func (rqp *RedisQueueProducer) notifyNewVote(pollID string) error {
+	rqp.client.Publish(context.Background(), "new_votes", pollID)
+	return nil
+}

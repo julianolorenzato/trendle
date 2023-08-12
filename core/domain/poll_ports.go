@@ -8,5 +8,5 @@ type PollDB interface {
 }
 
 type PollQueueProducer interface {
-	notifyNewVote()
+	notifyNewVote(pollID string) error
 }
