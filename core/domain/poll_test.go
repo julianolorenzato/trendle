@@ -1,15 +1,14 @@
-package poll_test
+package domain_test
 
 import (
+	"github.com/julianolorenzato/choosely/core/domain"
+	"github.com/julianolorenzato/choosely/core/fail"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/julianolorenzato/choosely/domain"
-	"github.com/julianolorenzato/choosely/domain/poll"
-	"github.com/julianolorenzato/choosely/domain/vote"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -30,7 +29,7 @@ func (s *PollTestSuite) TestNewPoll() {
 
 	s.Run("It should create a new Poll", func() {
 		// Act
-		p, err := poll.NewPoll(q, o, 3, true, time.Now())
+		p, err := domain.NewPoll(q, o, 3, true, time.Now())
 
 		// Assert
 		s.NotNil(p)
@@ -44,32 +43,32 @@ func (s *PollTestSuite) TestNewPoll() {
 
 	s.Run("It should not create a new Poll if the question have less than 2 characters", func() {
 		// Act
-		p, err := poll.NewPoll("Z", o, 3, true, time.Now())
+		p, err := domain.NewPoll("Z", o, 3, true, time.Now())
 
 		// Assert
 		s.Nil(p)
 		s.NotNil(err)
-		s.IsType(err, &domain.RangeError{})
+		s.IsType(err, &fail.RangeError{})
 	})
 
 	s.Run("It should not create a new Poll if the question have more than 50 characters", func() {
 		// Act
-		p, err := poll.NewPoll(strings.Repeat("Z", 51), o, 3, true, time.Now())
+		p, err := domain.NewPoll(strings.Repeat("Z", 51), o, 3, true, time.Now())
 
 		// Assert
 		s.Nil(p)
 		s.NotNil(err)
-		s.IsType(err, &domain.RangeError{})
+		s.IsType(err, &fail.RangeError{})
 	})
 
 	s.Run("It should not create a new Poll if it have less than 2 options", func() {
 		// Act
-		p, err := poll.NewPoll(q, []string{"Cherry"}, 3, true, time.Now())
+		p, err := domain.NewPoll(q, []string{"Cherry"}, 3, true, time.Now())
 
 		// Assert
 		s.Nil(p)
 		s.NotNil(err)
-		s.IsType(err, &domain.RangeError{})
+		s.IsType(err, &fail.RangeError{})
 	})
 
 	s.Run("It should not create a new Poll if it have more than 100 options", func() {
@@ -80,17 +79,17 @@ func (s *PollTestSuite) TestNewPoll() {
 		}
 
 		// Act
-		p, err := poll.NewPoll(q, opts, 3, true, time.Now())
+		p, err := domain.NewPoll(q, opts, 3, true, time.Now())
 
 		// Assert
 		s.Nil(p)
 		s.NotNil(err)
-		s.IsType(err, &domain.RangeError{})
+		s.IsType(err, &fail.RangeError{})
 	})
 
 	s.Run("It should not create a poll if the number of choices is zero", func() {
 		// Act
-		p, err := poll.NewPoll(q, o, 0, true, time.Now())
+		p, err := domain.NewPoll(q, o, 0, true, time.Now())
 
 		// Assert
 		s.Nil(p)
@@ -100,7 +99,7 @@ func (s *PollTestSuite) TestNewPoll() {
 
 	s.Run("It should not create a poll if the number of choices is greater than number of options", func() {
 		// Act
-		p, err := poll.NewPoll(q, []string{"Pirate", "Lucy"}, 3, true, time.Now())
+		p, err := domain.NewPoll(q, []string{"Pirate", "Lucy"}, 3, true, time.Now())
 
 		// Assert
 		s.Nil(p)
@@ -110,7 +109,7 @@ func (s *PollTestSuite) TestNewPoll() {
 
 	s.Run("It should create a poll with ExpiresAt zeroed if the poll is permanent", func() {
 		// Act
-		p, err := poll.NewPoll(q, o, 3, true, time.Now())
+		p, err := domain.NewPoll(q, o, 3, true, time.Now())
 
 		// Assert
 		s.Nil(err)
@@ -123,7 +122,7 @@ func (s *PollTestSuite) TestNewPoll() {
 		date := time.Now().AddDate(0, 3, 0)
 
 		// Act
-		p, err := poll.NewPoll(q, o, 3, false, date)
+		p, err := domain.NewPoll(q, o, 3, false, date)
 
 		// Assert
 		s.Nil(err)
@@ -137,19 +136,19 @@ func (s *PollTestSuite) TestNewPoll() {
 		date := time.Now().AddDate(0, -3, 0)
 
 		// Act
-		p, err := poll.NewPoll(q, o, 3, false, date)
+		p, err := domain.NewPoll(q, o, 3, false, date)
 
 		// Assert
 		s.NotNil(err)
 		s.Nil(p)
-		s.IsType(err, &domain.ExpiredError{})
+		s.IsType(err, &fail.ExpiredError{})
 	})
 }
 
 func (s *PollTestSuite) TestCheckVote() {
 	s.Run("It should not return a error", func() {
 		// Assert
-		p := &poll.Poll{
+		p := &domain.Poll{
 			Options: map[string]bool{
 				"first":  true,
 				"second": true,
@@ -159,7 +158,7 @@ func (s *PollTestSuite) TestCheckVote() {
 			NumberOfChoices: 2,
 		}
 
-		v := &vote.Vote{
+		v := &domain.Vote{
 			ID:             uuid.NewString(),
 			VoterID:        uuid.NewString(),
 			ChoosenOptions: []string{"first", "third"},
@@ -172,7 +171,7 @@ func (s *PollTestSuite) TestCheckVote() {
 	})
 
 	s.Run("It should not vote if the poll is not permanent and the expires date is already passed", func() {
-		p := &poll.Poll{
+		p := &domain.Poll{
 			Options: map[string]bool{
 				"first":  true,
 				"second": true,
@@ -183,7 +182,7 @@ func (s *PollTestSuite) TestCheckVote() {
 			ExpiresAt:       time.Now().AddDate(0, 0, -1),
 		}
 
-		v := &vote.Vote{
+		v := &domain.Vote{
 			ID:             uuid.NewString(),
 			VoterID:        uuid.NewString(),
 			ChoosenOptions: []string{"first", "third"},
@@ -193,11 +192,11 @@ func (s *PollTestSuite) TestCheckVote() {
 		err := p.CheckVote(v)
 
 		s.NotNil(err)
-		s.IsType(err, &domain.ExpiredError{})
+		s.IsType(err, &fail.ExpiredError{})
 	})
 
 	s.Run("It should not vote if the length of choosed options is different from the Poll.NumberOfChoices", func() {
-		p := &poll.Poll{
+		p := &domain.Poll{
 			Options: map[string]bool{
 				"first":  true,
 				"second": true,
@@ -207,7 +206,7 @@ func (s *PollTestSuite) TestCheckVote() {
 			NumberOfChoices: 2,
 		}
 
-		v := &vote.Vote{
+		v := &domain.Vote{
 			ID:             uuid.NewString(),
 			VoterID:        uuid.NewString(),
 			ChoosenOptions: []string{"first"},
@@ -221,7 +220,7 @@ func (s *PollTestSuite) TestCheckVote() {
 	})
 
 	s.Run("It should not vote if some of choosed options does not exists", func() {
-		p := &poll.Poll{
+		p := &domain.Poll{
 			Options: map[string]bool{
 				"first":  true,
 				"second": true,
@@ -230,8 +229,8 @@ func (s *PollTestSuite) TestCheckVote() {
 			IsPermanent:     true,
 			NumberOfChoices: 2,
 		}
-		
-		v := &vote.Vote{
+
+		v := &domain.Vote{
 			ID:             uuid.NewString(),
 			VoterID:        uuid.NewString(),
 			ChoosenOptions: []string{"first", "fourth"},
@@ -241,6 +240,6 @@ func (s *PollTestSuite) TestCheckVote() {
 		err := p.CheckVote(v)
 
 		s.NotNil(err)
-		s.IsType(err, &domain.DoesNotExistsError{})
+		s.IsType(err, &fail.DoesNotExistsError{})
 	})
 }

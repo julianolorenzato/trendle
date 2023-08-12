@@ -1,4 +1,4 @@
-package vote
+package domain
 
 import (
 	"time"

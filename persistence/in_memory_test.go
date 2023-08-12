@@ -1,11 +1,11 @@
 package persistence_test
 
 import (
+	"github.com/julianolorenzato/choosely/core/domain"
+	"github.com/julianolorenzato/choosely/persistence"
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/julianolorenzato/choosely/adapters/persistence"
-	"github.com/julianolorenzato/choosely/domain/poll"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +16,7 @@ func TestExists(t *testing.T) {
 		ids := []string{uuid.NewString(), uuid.NewString(), uuid.NewString()}
 
 		iMPR := &persistence.InMemoryPollRepository{
-			Polls: []*poll.Poll{
+			Polls: []*domain.Poll{
 				{ID: ids[0]},
 				{ID: ids[1]},
 				{ID: ids[2]},
@@ -32,7 +32,7 @@ func TestExists(t *testing.T) {
 		ids := []string{uuid.NewString(), uuid.NewString(), uuid.NewString()}
 
 		iMPR := &persistence.InMemoryPollRepository{
-			Polls: []*poll.Poll{
+			Polls: []*domain.Poll{
 				{ID: ids[0]},
 				{ID: ids[1]},
 				{ID: ids[2]},
@@ -52,7 +52,7 @@ func TestGetByID(t *testing.T) {
 		ids := []string{uuid.NewString(), uuid.NewString(), uuid.NewString()}
 
 		iMPR := &persistence.InMemoryPollRepository{
-			Polls: []*poll.Poll{
+			Polls: []*domain.Poll{
 				{ID: ids[0]},
 				{ID: ids[1]},
 				{ID: ids[2]},
@@ -68,7 +68,7 @@ func TestGetByID(t *testing.T) {
 
 	t.Run("It should return nil if the poll does not exists in memory", func(t *testing.T) {
 		iMPR := &persistence.InMemoryPollRepository{
-			Polls: []*poll.Poll{},
+			Polls: []*domain.Poll{},
 		}
 
 		p, err := iMPR.GetByID(uuid.NewString())
@@ -84,10 +84,10 @@ func TestCreate(t *testing.T) {
 
 	t.Run("It should create a new poll in the memory", func(t *testing.T) {
 		iMPR := &persistence.InMemoryPollRepository{
-			Polls: []*poll.Poll{},
+			Polls: []*domain.Poll{},
 		}
 
-		poll := &poll.Poll{ID: uuid.NewString()}
+		poll := &domain.Poll{ID: uuid.NewString()}
 
 		err := iMPR.Create(poll)
 
@@ -101,10 +101,10 @@ func TestSave(t *testing.T) {
 
 	t.Run("It should create a new poll in the memory if doest not exists", func(t *testing.T) {
 		iMPR := &persistence.InMemoryPollRepository{
-			Polls: []*poll.Poll{},
+			Polls: []*domain.Poll{},
 		}
 
-		poll := &poll.Poll{ID: uuid.NewString()}
+		poll := &domain.Poll{ID: uuid.NewString()}
 
 		err := iMPR.Save(poll)
 
@@ -113,10 +113,10 @@ func TestSave(t *testing.T) {
 	})
 
 	t.Run("It should update a poll that already exists in memory", func(t *testing.T) {
-		p := &poll.Poll{ID: uuid.NewString(), Question: "Before"}
+		p := &domain.Poll{ID: uuid.NewString(), Question: "Before"}
 
 		iMPR := &persistence.InMemoryPollRepository{
-			Polls: []*poll.Poll{p},
+			Polls: []*domain.Poll{p},
 		}
 
 		p.Question = "After"

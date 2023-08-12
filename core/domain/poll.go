@@ -1,13 +1,12 @@
-package poll
+package domain
 
 import (
 	"errors"
 	"fmt"
+	"github.com/julianolorenzato/choosely/core/fail"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/julianolorenzato/choosely/domain"
-	"github.com/julianolorenzato/choosely/domain/vote"
 )
 
 type Poll struct {
@@ -30,11 +29,11 @@ func (o Options) exists(optName string) bool {
 
 func NewPoll(qtn string, opts []string, nCh uint32, isPerm bool, exp time.Time) (*Poll, error) {
 	if len(qtn) < 2 || len(qtn) > 50 {
-		return nil, &domain.RangeError{Name: "poll question characters length", Min: 2, Max: 50}
+		return nil, &fail.RangeError{Name: "poll question characters length", Min: 2, Max: 50}
 	}
 
 	if len(opts) < 2 || len(opts) > 100 {
-		return nil, &domain.RangeError{Name: "poll options", Min: 2, Max: 100}
+		return nil, &fail.RangeError{Name: "poll options", Min: 2, Max: 100}
 	}
 
 	if nCh == 0 || nCh > uint32(len(opts)) {
@@ -45,7 +44,7 @@ func NewPoll(qtn string, opts []string, nCh uint32, isPerm bool, exp time.Time) 
 		exp = time.Time{}
 	} else {
 		if exp.Before(time.Now()) {
-			return nil, &domain.ExpiredError{Name: "poll", ExpiredDate: exp}
+			return nil, &fail.ExpiredError{Name: "poll", ExpiredDate: exp}
 		}
 	}
 
@@ -66,9 +65,9 @@ func NewPoll(qtn string, opts []string, nCh uint32, isPerm bool, exp time.Time) 
 	return p, nil
 }
 
-func (p *Poll) CheckVote(vote *vote.Vote) error {
+func (p *Poll) CheckVote(vote *Vote) error {
 	if !p.IsPermanent && p.ExpiresAt.Before(time.Now()) {
-		return &domain.ExpiredError{Name: "poll", ExpiredDate: p.ExpiresAt}
+		return &fail.ExpiredError{Name: "poll", ExpiredDate: p.ExpiresAt}
 	}
 
 	if len(vote.ChoosenOptions) != int(p.NumberOfChoices) {
@@ -80,7 +79,7 @@ func (p *Poll) CheckVote(vote *vote.Vote) error {
 		exists := p.Options.exists(option)
 
 		if !exists {
-			return &domain.DoesNotExistsError{Class: "option", Name: option}
+			return &fail.DoesNotExistsError{Class: "option", Name: option}
 		}
 	}
 

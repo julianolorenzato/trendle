@@ -2,26 +2,25 @@ package network
 
 import (
 	"encoding/json"
+	"github.com/julianolorenzato/choosely/core"
 	"net/http"
-
-	"github.com/julianolorenzato/choosely/domain/poll"
 )
 
-type PollHandler struct {
-	service *poll.PollService
+type Handler struct {
+	core *core.Core
 }
 
-func NewPollHandler(s *poll.PollService) *PollHandler {
-	return &PollHandler{service: s}
+func NewHandler(cr *core.Core) *Handler {
+	return &Handler{core: cr}
 }
 
-func (h *PollHandler) CreateNewPoll(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateNewPoll(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	var dto poll.CreateNewPollDTO
+	var dto core.CreateNewPollDTO
 
 	err := json.NewDecoder(r.Body).Decode(&dto)
 	if err != nil {
@@ -29,20 +28,20 @@ func (h *PollHandler) CreateNewPoll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.service.CreateNewPoll(dto)
+	err = h.core.CreateNewPoll(dto)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadGateway)
 		return
 	}
 }
 
-func (h *PollHandler) VoteInPoll(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) VoteInPoll(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	var dto poll.VoteInPollDTO
+	var dto core.VoteInPollDTO
 
 	err := json.NewDecoder(r.Body).Decode(&dto)
 	if err != nil {
@@ -50,9 +49,13 @@ func (h *PollHandler) VoteInPoll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.service.VoteInPoll(dto)
+	err = h.core.VoteInPoll(dto)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+}
+
+func (h *Handler) GetPollResults(w http.ResponseWriter, r *http.Request) {
+	handleWebSocket(w, r)
 }

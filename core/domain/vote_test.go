@@ -1,10 +1,10 @@
-package vote_test
+package domain_test
 
 import (
+	"github.com/julianolorenzato/choosely/core/domain"
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/julianolorenzato/choosely/domain/vote"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +16,7 @@ func TestNew(t *testing.T) {
 		pollID := uuid.NewString()
 		choosenOptions := []string{"Dog", "Avocado", "Purple"}
 
-		v := vote.New(voterID, pollID, choosenOptions)
+		v := domain.New(voterID, pollID, choosenOptions)
 
 		a.NotNil(v)
 		a.Equal(v.VoterID, voterID)

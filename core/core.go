@@ -1,21 +1,20 @@
-package poll
+package core
 
 import (
 	"fmt"
+	"github.com/julianolorenzato/choosely/core/domain"
 	"time"
-
-	"github.com/julianolorenzato/choosely/domain/vote"
 )
 
-type PollService struct {
-	PollRepo PollRepository
-	VoteRepo vote.VoteRepository
+type Core struct {
+	PollDB domain.PollDB
+	VoteDB domain.VoteDB
 }
 
-func NewPollService(PollRepo PollRepository, VoteRepo vote.VoteRepository) *PollService {
-	return &PollService{
-		PollRepo,
-		VoteRepo,
+func NewCore(pollDB domain.PollDB, voteDB domain.VoteDB) *Core {
+	return &Core{
+		PollDB: pollDB,
+		VoteDB: voteDB,
 	}
 }
 
@@ -29,8 +28,8 @@ type CreateNewPollDTO struct {
 	ExpiresAt       time.Time
 }
 
-func (s *PollService) CreateNewPoll(dto CreateNewPollDTO) error {
-	p, err := NewPoll(
+func (c *Core) CreateNewPoll(dto CreateNewPollDTO) error {
+	p, err := domain.NewPoll(
 		dto.Question,
 		dto.Options,
 		dto.NumberOfChoices,
@@ -41,7 +40,7 @@ func (s *PollService) CreateNewPoll(dto CreateNewPollDTO) error {
 		return err
 	}
 
-	err = s.PollRepo.Save(p)
+	err = c.PollDB.Save(p)
 	if err != nil {
 		return err
 	}
@@ -55,8 +54,8 @@ type VoteInPollDTO struct {
 	ChoosenOptions []string
 }
 
-func (s *PollService) VoteInPoll(dto VoteInPollDTO) error {
-	p, err := s.PollRepo.GetByID(dto.PollID)
+func (c *Core) VoteInPoll(dto VoteInPollDTO) error {
+	p, err := c.PollDB.GetByID(dto.PollID)
 	if err != nil {
 		return err
 	}
@@ -66,14 +65,14 @@ func (s *PollService) VoteInPoll(dto VoteInPollDTO) error {
 		return err
 	}
 
-	v := vote.New(dto.VoterID, dto.PollID, dto.ChoosenOptions)
+	v := domain.New(dto.VoterID, dto.PollID, dto.ChoosenOptions)
 
 	err = p.CheckVote(v)
 	if err != nil {
 		return err
 	}
 
-	err = s.VoteRepo.Create(v)
+	err = c.VoteDB.Create(v)
 	if err != nil {
 		return err
 	}
@@ -85,8 +84,8 @@ type GetPollResultsDTO struct {
 	PollID string
 }
 
-func (s *PollService) GetPollResults(dto GetPollResultsDTO) (map[string]uint, error) {
-	poll, err := s.PollRepo.GetByID(dto.PollID)
+func (c *Core) GetPollResults(dto GetPollResultsDTO) (map[string]uint, error) {
+	poll, err := c.PollDB.GetByID(dto.PollID)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +95,7 @@ func (s *PollService) GetPollResults(dto GetPollResultsDTO) (map[string]uint, er
 		return nil, err
 	}
 
-	res, err := s.VoteRepo.GetResults(dto.PollID)
+	res, err := c.VoteDB.GetResults(dto.PollID)
 	if err != nil {
 		return nil, err
 	}

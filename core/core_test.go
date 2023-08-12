@@ -1,18 +1,19 @@
-package poll_test
+package core_test
 
 import (
+	"github.com/julianolorenzato/choosely/core"
+	"github.com/julianolorenzato/choosely/core/domain"
+	"github.com/julianolorenzato/choosely/persistence"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/julianolorenzato/choosely/adapters/persistence"
-	"github.com/julianolorenzato/choosely/domain/poll"
 	"github.com/stretchr/testify/suite"
 )
 
 type TestSuite struct {
 	suite.Suite
-	sut *poll.PollService
+	sut *core.Core
 }
 
 func Test(t *testing.T) {
@@ -20,15 +21,15 @@ func Test(t *testing.T) {
 }
 
 func (s *TestSuite) SetupSubTest() {
-	s.sut = &poll.PollService{
-		PollRepo: persistence.NewInMemoryPollRepository(),
-		VoteRepo: persistence.NewInMemoryVoteRepository(),
+	s.sut = &core.Core{
+		PollDB: persistence.NewInMemoryPollRepository(),
+		VoteDB: persistence.NewInMemoryVoteRepository(),
 	}
 }
 
 func (s *TestSuite) TestCreateNewPoll() {
 	s.Run("Should create a new poll", func() {
-		dto := poll.CreateNewPollDTO{
+		dto := core.CreateNewPollDTO{
 			Question:        "Some question",
 			Options:         []string{"opt0", "opt1", "opt2"},
 			NumberOfChoices: 2,
@@ -43,7 +44,7 @@ func (s *TestSuite) TestCreateNewPoll() {
 }
 
 func (s *TestSuite) TestVoteInPoll() {
-	p := &poll.Poll{
+	p := &domain.Poll{
 		ID:              uuid.NewString(),
 		NumberOfChoices: 3,
 		Options: map[string]bool{
@@ -57,9 +58,9 @@ func (s *TestSuite) TestVoteInPoll() {
 	}
 
 	s.Run("It should vote in a poll", func() {
-		s.sut.PollRepo.Save(p)
+		s.sut.PollDB.Save(p)
 
-		dto := poll.VoteInPollDTO{
+		dto := core.VoteInPollDTO{
 			PollID:         p.ID,
 			VoterID:        uuid.NewString(),
 			ChoosenOptions: []string{"Strawberry", "Orange", "Avocado"},
@@ -71,9 +72,9 @@ func (s *TestSuite) TestVoteInPoll() {
 	})
 
 	s.Run("It should not vote in a poll that does not exists", func() {
-		s.sut.PollRepo.Save(p)
+		s.sut.PollDB.Save(p)
 
-		dto := poll.VoteInPollDTO{
+		dto := core.VoteInPollDTO{
 			PollID:         uuid.NewString(), // <-- Random pollID
 			VoterID:        uuid.NewString(),
 			ChoosenOptions: []string{"Strawberry", "Orange", "Avocado"},

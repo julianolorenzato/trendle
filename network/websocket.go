@@ -2,10 +2,10 @@ package network
 
 import (
 	"fmt"
+	"github.com/julianolorenzato/choosely/core/domain"
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"github.com/julianolorenzato/choosely/domain/poll"
 )
 
 var upgrader = websocket.Upgrader{
@@ -22,7 +22,7 @@ type WSClient struct {
 type WSMessage struct {
 	Action string
 	User   string
-	Poll   poll.Poll
+	Poll   domain.Poll
 }
 
 func handleWebSocket(w http.ResponseWriter, r *http.Request) {

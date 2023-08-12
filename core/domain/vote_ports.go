@@ -1,6 +1,6 @@
-package vote
+package domain
 
-type VoteRepository interface {
+type VoteDB interface {
 	GetResults(pollID string) (map[string]uint, error)
 	// GetByID(ID string) (*Vote, error)
 	Create(*Vote) error
