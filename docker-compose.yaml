@@ -5,7 +5,7 @@ services:
     image: postgres
     container_name: choosely-postgres
     ports:
-      - 5432:5432
+      - '5432:5432'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -19,15 +19,19 @@ services:
     image: redis
     container_name: choosely-redis
     ports:
-      - 6379:6379
+      - '6379:6379'
 
   app:
-    build: 
-      context: .
-      dockerfile: Dockerfile
+    entrypoint: "air"
+    build:
+      dockerfile: Dockerfile # Dockerfile name
+      context: . # Where Dockerfile is located
+      target: dev # Stage of multistage building
+    volumes:
+      - .:/app # Map this directory to /app directory inside the container
     container_name: choosely-app
     ports:
-      - 8080:8080
+      - '8080:8080'
     depends_on:
       - postgres
       - redis
@@ -36,7 +40,7 @@ services:
     command: /app/server
     
 volumes:
-  db-data:
+  db-data: # volume used by postgres service
 
 networks:
   main-net:
