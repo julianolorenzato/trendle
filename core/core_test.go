@@ -22,8 +22,8 @@ func Test(t *testing.T) {
 
 func (s *TestSuite) SetupSubTest() {
 	s.sut = &core.Core{
-		PollDB: persistence.NewInMemoryPollRepository(),
-		VoteDB: persistence.NewInMemoryVoteRepository(),
+		PollDB: persistence.NewInMemoryPollDB(),
+		VoteDB: persistence.NewInMemoryVoteDB(),
 	}
 }
 

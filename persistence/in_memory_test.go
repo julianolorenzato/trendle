@@ -15,7 +15,7 @@ func TestExists(t *testing.T) {
 	t.Run("It should return true for a poll that exists", func(t *testing.T) {
 		ids := []string{uuid.NewString(), uuid.NewString(), uuid.NewString()}
 
-		iMPR := &persistence.InMemoryPollRepository{
+		iMPR := &persistence.InMemoryPollDB{
 			Polls: []*domain.Poll{
 				{ID: ids[0]},
 				{ID: ids[1]},
@@ -31,7 +31,7 @@ func TestExists(t *testing.T) {
 	t.Run("It should return false for a poll that not exists", func(t *testing.T) {
 		ids := []string{uuid.NewString(), uuid.NewString(), uuid.NewString()}
 
-		iMPR := &persistence.InMemoryPollRepository{
+		iMPR := &persistence.InMemoryPollDB{
 			Polls: []*domain.Poll{
 				{ID: ids[0]},
 				{ID: ids[1]},
@@ -51,7 +51,7 @@ func TestGetByID(t *testing.T) {
 	t.Run("It should get a poll from memory", func(t *testing.T) {
 		ids := []string{uuid.NewString(), uuid.NewString(), uuid.NewString()}
 
-		iMPR := &persistence.InMemoryPollRepository{
+		iMPR := &persistence.InMemoryPollDB{
 			Polls: []*domain.Poll{
 				{ID: ids[0]},
 				{ID: ids[1]},
@@ -67,7 +67,7 @@ func TestGetByID(t *testing.T) {
 	})
 
 	t.Run("It should return nil if the poll does not exists in memory", func(t *testing.T) {
-		iMPR := &persistence.InMemoryPollRepository{
+		iMPR := &persistence.InMemoryPollDB{
 			Polls: []*domain.Poll{},
 		}
 
@@ -83,7 +83,7 @@ func TestCreate(t *testing.T) {
 	a := assert.New(t)
 
 	t.Run("It should create a new poll in the memory", func(t *testing.T) {
-		iMPR := &persistence.InMemoryPollRepository{
+		iMPR := &persistence.InMemoryPollDB{
 			Polls: []*domain.Poll{},
 		}
 
@@ -100,7 +100,7 @@ func TestSave(t *testing.T) {
 	a := assert.New(t)
 
 	t.Run("It should create a new poll in the memory if doest not exists", func(t *testing.T) {
-		iMPR := &persistence.InMemoryPollRepository{
+		iMPR := &persistence.InMemoryPollDB{
 			Polls: []*domain.Poll{},
 		}
 
@@ -115,7 +115,7 @@ func TestSave(t *testing.T) {
 	t.Run("It should update a poll that already exists in memory", func(t *testing.T) {
 		p := &domain.Poll{ID: uuid.NewString(), Question: "Before"}
 
-		iMPR := &persistence.InMemoryPollRepository{
+		iMPR := &persistence.InMemoryPollDB{
 			Polls: []*domain.Poll{p},
 		}
 
