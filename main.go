@@ -1,21 +1,25 @@
 package main
 
 import (
-	"log"
-	"os"
-
-	"github.com/joho/godotenv"
+	"github.com/julianolorenzato/choosely/config"
 	"github.com/julianolorenzato/choosely/network"
 )
 
-func main() {
-	// Load environment variables
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal(err)
-	}
+//var config = viper.Viper{}
+//
+//func init() {
+//	viper.Set("ADDR", "choosely-redis:5432")
+//	fmt.Println(viper.Get("ADDR"), "addr")
+//	fmt.Println("first?")
+//	// Load environment variables
+//	err := godotenv.Load(".env")
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//}
 
+func main() {
 	// Start app server
-	port := os.Getenv("PORT")
+	port := config.Env("PORT")
 	network.NewHTTPServer(":" + port).Start()
 }

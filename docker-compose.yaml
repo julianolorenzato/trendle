@@ -18,6 +18,8 @@ services:
   redis:
     image: redis
     container_name: choosely-redis
+    networks:
+      - main-net
     ports:
       - '6379:6379'
 

@@ -2,19 +2,19 @@ package persistence
 
 import (
 	"database/sql"
-	"github.com/julianolorenzato/choosely/core/domain"
-	"log"
-	"os"
-
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/julianolorenzato/choosely/config"
+	"github.com/julianolorenzato/choosely/core/domain"
 	_ "github.com/lib/pq"
+	"log"
 )
 
+// This fn is being called twice, I must move it to an init function initializing a package scoped var
 func establishPostgresConnection() (*sql.DB, error) {
 	// Open database's poll of connections
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL")+"?sslmode=disable")
+	db, err := sql.Open("postgres", config.Env("DATABASE_URL")+"?sslmode=disable")
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func establishPostgresConnection() (*sql.DB, error) {
 	// Perform "up" migrations
 	m.Up()
 
-	log.Println("database initialised and migrations performed")
+	log.Println("Postgres successfully connected and migrations performed")
 
 	return db, err
 }
