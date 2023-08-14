@@ -10,13 +10,15 @@ type Core struct {
 	PollDB        domain.PollDB
 	VoteDB        domain.VoteDB
 	QueueConsumer QueueConsumer
+	QueueProducer QueueProducer
 }
 
-func NewCore(pollDB domain.PollDB, voteDB domain.VoteDB, qc QueueConsumer) *Core {
+func NewCore(pollDB domain.PollDB, voteDB domain.VoteDB, qc QueueConsumer, qp QueueProducer) *Core {
 	return &Core{
 		PollDB:        pollDB,
 		VoteDB:        voteDB,
 		QueueConsumer: qc,
+		QueueProducer: qp,
 	}
 }
 
@@ -78,6 +80,8 @@ func (c *Core) VoteInPoll(dto VoteInPollDTO) error {
 	if err != nil {
 		return err
 	}
+
+	c.QueueProducer.NotifyNewVote(dto.PollID)
 
 	return nil
 }

@@ -25,12 +25,14 @@ func (server *HTTPServer) setupRoutes() {
 	pollDB := persistence.NewPostgresPollDB()
 	voteDB := persistence.NewPostgresVoteDB()
 	qc := queues.NewRedisQueueConsumer()
+	qp := queues.NewRedisQueueProducer()
 
-	cr := core.NewCore(pollDB, voteDB, qc)
+	cr := core.NewCore(pollDB, voteDB, qc, qp)
 	h := NewHandler(cr)
 
 	server.router.HandleFunc("/poll/create", h.CreateNewPoll)
 	server.router.HandleFunc("/poll/vote", h.VoteInPoll)
+	server.router.HandleFunc("/poll/results/{pollID}", h.GetPollResults)
 }
 
 func (server *HTTPServer) Start() {

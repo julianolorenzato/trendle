@@ -2,6 +2,7 @@ package network
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/julianolorenzato/choosely/core"
 	"log"
@@ -64,29 +65,7 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
-// WSClients maps [WS connection]PollID
-//var wsClients = make(map[*websocket.Conn]string)
-
 func (h *Handler) GetPollResults(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, "Method not Allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var dto core.GetPollResultsDTO
-
-	err := json.NewDecoder(r.Body).Decode(&dto)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	results, err := h.core.GetPollResults(dto)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadGateway)
-		return
-	}
-
 	// Upgrade the HTTP connection to WS connection
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -96,8 +75,20 @@ func (h *Handler) GetPollResults(w http.ResponseWriter, r *http.Request) {
 	log.Println("Connected websocket")
 	defer conn.Close()
 
-	// maybe i dont need this next line???
-	//wsClients[conn] = dto.PollID
+	params := mux.Vars(r)
+	pollID, ok := params["pollID"]
+	if !ok {
+		http.Error(w, "need pollID in URL params", http.StatusBadRequest)
+		return
+	}
+
+	var dto = core.GetPollResultsDTO{PollID: pollID}
+
+	results, err := h.core.GetPollResults(dto)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
+	}
 
 	// Write poll results to first message
 	err = conn.WriteJSON(results)
@@ -105,16 +96,18 @@ func (h *Handler) GetPollResults(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	// Subscribe to channel and write new results every time
 	// a new vote is computed in this poll
-	for {
-		wsW, err := conn.NextWriter(websocket.TextMessage)
+	h.core.QueueConsumer.SubscribeToPollChannel(dto.PollID, func() {
+		pollFreshResults, err := h.core.GetPollResults(dto)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		// Pass the writer to QueueConsumer write the fresh results and close every time
-		h.core.QueueConsumer.SubscribeToPollChannel(dto.PollID, wsW)
-	}
+		err = conn.WriteJSON(pollFreshResults)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	})
 }

@@ -184,7 +184,7 @@ func (db *PostgresVoteDB) GetResults(pollID string) (map[string]uint, error) {
 		var option string
 		var votes uint
 
-		err := rows.Scan(option, votes)
+		err := rows.Scan(&option, &votes)
 		if err != nil {
 			return nil, err
 		}
