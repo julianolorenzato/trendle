@@ -42,7 +42,7 @@ func (c *Core) CreateNewPoll(dto CreateNewPollDTO) error {
 		return err
 	}
 
-	err = c.PollDB.Save(p)
+	err = c.PollDB.Create(p)
 	if err != nil {
 		return err
 	}

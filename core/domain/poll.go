@@ -27,6 +27,16 @@ func (o Options) exists(optName string) bool {
 	return ok
 }
 
+func (o Options) ToSlice() []string {
+	keys := make([]string, 0, len(o))
+
+	for key := range o {
+		keys = append(keys, key)
+	}
+
+	return keys
+}
+
 func NewPoll(qtn string, opts []string, nCh uint32, isPerm bool, exp time.Time) (*Poll, error) {
 	if len(qtn) < 2 || len(qtn) > 50 {
 		return nil, &fail.RangeError{Name: "poll question characters length", Min: 2, Max: 50}

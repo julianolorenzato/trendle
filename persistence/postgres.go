@@ -7,7 +7,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/julianolorenzato/choosely/config"
 	"github.com/julianolorenzato/choosely/core/domain"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 	"log"
 )
 
@@ -88,8 +88,8 @@ func (db *PostgresPollDB) Create(poll *domain.Poll) error {
 		`INSERT INTO polls
 		(id, question, number_of_choices, options, is_permanent, expires_at, created_at)
 		VALUES
-		($1, $2, $3, $4, $5, $6, $7, $8)`,
-		poll.ID, poll.Question, poll.NumberOfChoices, poll.Options, poll.IsPermanent, poll.ExpiresAt, poll.CreatedAt,
+		($1, $2, $3, $4, $5, $6, $7)`,
+		poll.ID, poll.Question, poll.NumberOfChoices, pq.Array(poll.Options.ToSlice()), poll.IsPermanent, poll.ExpiresAt, poll.CreatedAt,
 	)
 	if err != nil {
 		return err
