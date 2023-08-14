@@ -9,6 +9,7 @@ import (
 	"github.com/julianolorenzato/choosely/core/domain"
 	"github.com/lib/pq"
 	"log"
+	"time"
 )
 
 // This fn is being called twice, I must move it to an init function initializing a package scoped var
@@ -71,13 +72,28 @@ func (db *PostgresPollDB) GetByID(ID string) (*domain.Poll, error) {
 	}
 	defer rows.Close()
 
-	var poll *domain.Poll
+	var id string
+	var question string
+	var numberOfChoices uint32
+	var optionsSlice pq.StringArray
+	var isPermanent bool
+	var expiresAt time.Time
+	var createdAt time.Time
 
 	for rows.Next() {
-		err := rows.Scan(&poll.ID, &poll.Question, &poll.NumberOfChoices)
+		err := rows.Scan(&id, &question, &numberOfChoices, &optionsSlice, &isPermanent, &expiresAt, &createdAt)
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	var poll = &domain.Poll{
+		ID:              id,
+		Options:         domain.NewOptions(optionsSlice),
+		NumberOfChoices: numberOfChoices,
+		IsPermanent:     isPermanent,
+		ExpiresAt:       expiresAt,
+		CreatedAt:       createdAt,
 	}
 
 	return poll, nil
@@ -121,24 +137,25 @@ func NewPostgresVoteDB() *PostgresVoteDB {
 	}
 }
 
+// Errado, alterar, fazer igual GetByID da poll
 func (db *PostgresVoteDB) GetByID(ID string) (*domain.Vote, error) {
 	row := db.reader.QueryRow(`SELECT * FROM votes WHERE id = $1`, ID)
 
-	var vote *domain.Vote
+	var vote domain.Vote
 
 	err := row.Scan(&vote.ID, &vote.VoterID, &vote.PollID)
 	if err != nil {
 		return nil, err
 	}
 
-	return vote, nil
+	return &vote, nil
 }
 
 func (db *PostgresVoteDB) Create(vote *domain.Vote) error {
 	_, err := db.writer.Exec(
 		`INSERT INTO votes (id, voter_id, poll_id, choosen_options, created_at)
 		VALUES ($1, $2, $3, $4, $5)`,
-		vote.ID, vote.VoterID, vote.VoterID, vote.ChoosenOptions, vote.CreatedAt,
+		vote.ID, vote.VoterID, vote.PollID, pq.Array(vote.ChoosenOptions), vote.CreatedAt,
 	)
 
 	if err != nil {

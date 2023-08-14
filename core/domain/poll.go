@@ -21,6 +21,16 @@ type Poll struct {
 
 type Options map[string]bool
 
+func NewOptions(sliceOpts []string) Options {
+	var opts = make(Options)
+
+	for _, opt := range sliceOpts {
+		opts[opt] = true
+	}
+
+	return opts
+}
+
 func (o Options) exists(optName string) bool {
 	_, ok := o[optName]
 
