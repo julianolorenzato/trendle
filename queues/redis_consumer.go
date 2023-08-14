@@ -3,8 +3,10 @@ package queues
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/julianolorenzato/choosely/core/domain"
 	"github.com/redis/go-redis/v9"
+	"io"
 	"log"
 )
 
@@ -13,11 +15,15 @@ type RedisQueueConsumer struct {
 	voteDB domain.VoteDB
 }
 
-//type CallbackFn func(pollId string) map[string]int32
+func NewRedisQueueConsumer() *RedisQueueConsumer {
+	return &RedisQueueConsumer{
+		client: redisClient,
+	}
+}
 
-func (rqc *RedisQueueConsumer) receiveNewVote(e json.Encoder) {
-	pubsub := rqc.client.Subscribe(context.Background(), "new_votes")
-
+func (rqc *RedisQueueConsumer) SubscribeToPollChannel(pollID string, w io.WriteCloser) {
+	channel := fmt.Sprintf("new_votes_in_%s", pollID)
+	pubsub := rqc.client.Subscribe(context.Background(), channel)
 	defer pubsub.Close()
 
 	for {
@@ -33,9 +39,11 @@ func (rqc *RedisQueueConsumer) receiveNewVote(e json.Encoder) {
 			log.Fatal(err)
 		}
 
-		err = e.Encode(pollFreshResults)
+		err = json.NewEncoder(w).Encode(pollFreshResults)
 		if err != nil {
 			log.Fatal(err)
 		}
+		// Need close to websocket flushes the message
+		w.Close()
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/julianolorenzato/choosely/core"
 	"github.com/julianolorenzato/choosely/persistence"
+	"github.com/julianolorenzato/choosely/queues"
 	"log"
 	"net/http"
 )
@@ -23,8 +24,9 @@ func NewHTTPServer(addr string) *HTTPServer {
 func (server *HTTPServer) setupRoutes() {
 	pollDB := persistence.NewPostgresPollDB()
 	voteDB := persistence.NewPostgresVoteDB()
+	qc := queues.NewRedisQueueConsumer()
 
-	cr := core.NewCore(pollDB, voteDB)
+	cr := core.NewCore(pollDB, voteDB, qc)
 	h := NewHandler(cr)
 
 	server.router.HandleFunc("/poll/create", h.CreateNewPoll)

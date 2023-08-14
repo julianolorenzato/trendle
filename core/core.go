@@ -7,14 +7,16 @@ import (
 )
 
 type Core struct {
-	PollDB domain.PollDB
-	VoteDB domain.VoteDB
+	PollDB        domain.PollDB
+	VoteDB        domain.VoteDB
+	QueueConsumer QueueConsumer
 }
 
-func NewCore(pollDB domain.PollDB, voteDB domain.VoteDB) *Core {
+func NewCore(pollDB domain.PollDB, voteDB domain.VoteDB, qc QueueConsumer) *Core {
 	return &Core{
-		PollDB: pollDB,
-		VoteDB: voteDB,
+		PollDB:        pollDB,
+		VoteDB:        voteDB,
+		QueueConsumer: qc,
 	}
 }
 
