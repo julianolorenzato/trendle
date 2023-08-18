@@ -1,6 +1,5 @@
 # Trendle
 
----
 >A self-hosted, real-time polling system.
 
 ## About
