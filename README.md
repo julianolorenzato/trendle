@@ -1,16 +1,31 @@
-Should I move the folders into adapters folder to the root folder?
+# Trendle
 
-Como lidar com WebSocket:
+---
+>A self-hosted, real-time polling system.
 
-1 alternativa: Ao solicitar o endpoint de websocket enviando uma pollID, retornar
-os resultados dessa pollID e depois retornar os novos resultados dessa poll via WS sempre que
-recer uma nova mensagem de novo voto no canal dessa poll
+## About
 
-2 alternativa: Ao solicitar o endpoint de websocket enviando uma pollID, retornar
-os resultados dessa pollID e depois enviar uma nova mensagem via WS notificando que um novo voto foi computado
-sempre que receber uma nova mensagem de novo voto no canal dessa poll, assim o cliente ficaria responsavel por fazer
-uma nova request a uma rota http normal sempre que quiser (a cada 1 voto, a cada 5 votos, etc...)
+Trendle is a poll management system capable of persisting 
+and responding to poll results in real-time through WebSocket connections.
 
+## How to get started
 
-em ambos os casos eu precisaria usar um channel de votação para cada pollID (exemplo: new_vote_in_7s5da21wasd23555a)
-e precisaria talvez tambem guardar em memória cada uma das conexões
+Trendle uses PostgresSQL to persist the data, Redis to handle
+the voting pubsub and Docker to containerize the application,
+so make sure you have them in your environment.
+
+First, set the following environment variables:
+- **PORT** (where Trendle will listen)
+- **REDIS_ADDR** (Redis address)
+- **REDIS_PASS** (Redis password)
+- **DATABASE_URL** (PostgresSQL connection string)
+
+Then, build the Docker image running the following command:
+```
+docker build --target prod -t trendle-app .
+```
+
+Finally, run the image running the following command:
+```
+docker run trendle-app:latest
+```
