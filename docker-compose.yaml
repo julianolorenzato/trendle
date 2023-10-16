@@ -3,7 +3,7 @@ version: '3'
 services:
   postgres:
     image: postgres
-    container_name: choosely-postgres
+    container_name: trendle-postgres
     ports:
       - '5432:5432'
     environment:
@@ -17,7 +17,7 @@ services:
 
   redis:
     image: redis
-    container_name: choosely-redis
+    container_name: trendle-redis
     networks:
       - main-net
     ports:
@@ -31,7 +31,7 @@ services:
       target: dev # Stage of multistage building
     volumes:
       - .:/app # Map this directory to /app directory inside the container
-    container_name: choosely-app
+    container_name: trendle-app
     ports:
       - '8080:8080'
     depends_on:
