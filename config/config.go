@@ -7,10 +7,14 @@ import (
 )
 
 func init() {
-	// Load environment vars
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal(err)
+	appEnv := os.Getenv("APP_ENV")
+
+	if appEnv != "production" {
+		// Load environment vars
+		err := godotenv.Load(".env")
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
